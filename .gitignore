@@ -1,0 +1,39 @@
+# Build outputs (both build folders in use on this project)
+/build/
+/out/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+*.cmake
+!CMakeLists.txt
+!CMakePresets.json
+!CMakeUserPresets.json
+
+# Qt
+*.pro.user
+*.pro.user.*
+.qmlls.ini
+
+# Visual Studio
+.vs/
+*.vcxproj*
+*.sln
+*.suo
+*.user
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/c_cpp_properties.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Editor backups
+*~
+*.swp
