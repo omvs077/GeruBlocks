@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 24 24"
+   fill="none"
+   stroke="#000000"
+   stroke-width="1.6"
+   stroke-linecap="square"
+   stroke-linejoin="miter"
+   version="1.1"
+   id="svg6"
+   sodipodi:docname="file_csv.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs6" />
+  <sodipodi:namedview
+     id="namedview6"
+     pagecolor="#ffffff"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="12.006084"
+     inkscape:cx="9.4535406"
+     inkscape:cy="15.4505"
+     inkscape:current-layer="svg6" />
+  <polygon
+     points="5,3 15,3 19,7 19,21 5,21"
+     id="polygon1" />
+  <polyline
+     points="15,3 15,7 19,7"
+     id="polyline1"
+     transform="translate(-0.26503067,0.29447853)" />
+  <line
+     x1="8"
+     y1="11"
+     x2="16"
+     y2="11"
+     id="line1" />
+  <line
+     x1="8"
+     y1="16.604908"
+     x2="16"
+     y2="16.604908"
+     id="line2" />
+  <line
+     x1="8.0093889"
+     y1="11.876713"
+     x2="8.0112467"
+     y2="15.084291"
+     id="line3"
+     style="stroke-width:1.60095" />
+  <line
+     x1="11.958729"
+     y1="11.912646"
+     x2="11.96046"
+     y2="15.355681"
+     id="line4"
+     style="stroke-width:1.60108" />
+  <line
+     x1="16.020535"
+     y1="11.881142"
+     x2="16.022238"
+     y2="15.383045"
+     id="line5"
+     style="stroke-width:1.60111" />
+  <line
+     x1="15.816864"
+     y1="13.06389"
+     x2="8.2520714"
+     y2="13.064677"
+     id="line6"
+     style="stroke-width:0.702;stroke-dasharray:none" />
+  <line
+     x1="15.709578"
+     y1="14.560737"
+     x2="8.1447849"
+     y2="14.561523"
+     id="line6-9"
+     style="stroke-width:0.702;stroke-dasharray:none" />
+  <text
+     xml:space="preserve"
+     style="font-style:italic;font-size:3.37157px;line-height:0.316085px;font-family:Amiri;-inkscape-font-specification:'Amiri Italic';letter-spacing:0.0606881px;word-spacing:0.00410912px;writing-mode:lr-tb;direction:ltr;fill:#000000;fill-rule:evenodd;stroke-width:0.0221891;stroke-linecap:round;stroke-miterlimit:7.8;paint-order:markers stroke fill"
+     x="7.1280942"
+     y="9.5776157"
+     id="text1"><tspan
+       sodipodi:role="line"
+       id="tspan1"
+       x="7.1280942"
+       y="9.5776157"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Arial Nova';-inkscape-font-specification:'Arial Nova';stroke-width:0.0221891">csv</tspan></text>
+</svg>

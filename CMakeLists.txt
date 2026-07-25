@@ -32,7 +32,15 @@ qt_add_qml_module(GeruBlocksApp
     URI GeruBlocks
     VERSION 1.0
     QML_FILES
-        qml/Main.qml
+    qml/Main.qml
+    qml/IconGallery.qml
+    qml/Theme/Icon.qml
+    qml/Components/Heading.qml
+    qml/Components/AppText.qml
+    qml/Components/Link.qml
+    qml/Components/Button.qml
+    qml/Components/Badge.qml
+    qml/Components/Card.qml
     SOURCES
         src/Core/ThemeManager.h
         src/Core/ThemeManager.cpp
@@ -56,3 +64,16 @@ target_include_directories(GeruBlocksApp
 )
 
 # Resources (icons, fonts) will be added here once Batch 1 icons are wired in — Stage 2.
+file(GLOB ICON_FILES "${CMAKE_CURRENT_SOURCE_DIR}/assets/icons/*.svg")
+
+qt_add_resources(GeruBlocksApp "icons"
+    PREFIX "/icons"
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}/assets/icons"
+    FILES ${ICON_FILES}
+)
+
+qt_add_resources(GeruBlocksApp "textures"
+    PREFIX "/textures"
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}/assets/textures"
+    FILES "${CMAKE_CURRENT_SOURCE_DIR}/assets/textures/glow.png"
+)

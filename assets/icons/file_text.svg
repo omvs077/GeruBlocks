@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 24 24"
+   fill="none"
+   stroke="#000000"
+   stroke-width="1.8"
+   stroke-linecap="square"
+   stroke-linejoin="miter"
+   version="1.1"
+   id="svg3"
+   sodipodi:docname="file_text.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs3" />
+  <sodipodi:namedview
+     id="namedview3"
+     pagecolor="#ffffff"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="24.012168"
+     inkscape:cx="8.0584145"
+     inkscape:cy="15.096513"
+     inkscape:current-layer="svg3" />
+  <g
+     id="g3">
+    <polygon
+       points="5,3 15,3 19,7 19,21 5,21"
+       id="polygon1" />
+    <polyline
+       points="15,3 15,7 19,7"
+       id="polyline1"
+       transform="translate(-0.35337423,0.20613497)" />
+    <line
+       x1="8"
+       y1="11"
+       x2="16"
+       y2="11"
+       id="line1" />
+    <line
+       x1="8"
+       y1="14.5"
+       x2="16"
+       y2="14.5"
+       id="line2" />
+    <line
+       x1="8"
+       y1="18"
+       x2="13"
+       y2="18"
+       id="line3" />
+  </g>
+</svg>
