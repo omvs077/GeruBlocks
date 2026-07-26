@@ -41,6 +41,10 @@ qt_add_qml_module(GeruBlocksApp
     qml/Components/Button.qml
     qml/Components/Badge.qml
     qml/Components/Card.qml
+    qml/Components/DataTable.qml
+    qml/Components/AppTextInput.qml
+    qml/Components/Skeleton.qml
+    qml/Components/Keycap.qml
     SOURCES
         src/Core/ThemeManager.h
         src/Core/ThemeManager.cpp

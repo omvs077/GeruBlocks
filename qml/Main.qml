@@ -229,6 +229,93 @@ Window {
                         }
                     }
                 }
+          
+                Rectangle { width: parent.width; height: 1; color: ThemeManager.borderDefault }
+
+                // ---------- DataTable ----------
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 10
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "DataTable" }
+
+                    DataTable {
+                        width: 500
+                        height: 300
+                        columns: [
+                            { key: "zone", title: "Zone" },
+                            { key: "temp", title: "Temp (°C)", numeric: true, decimals: 1 },
+                            { key: "cost", title: "Monthly Cost", numeric: true, currency: true }
+                        ]
+                        rows: [
+                            { zone: "Zone 1 — Lobby", temp: 21.5, cost: 4500000 },
+                            { zone: "Zone 2 — Server Room", temp: 18.2, cost: 12300000 },
+                            { zone: "Zone 3 — Office East", temp: 23.1, cost: 3800000 },
+                            { zone: "Zone 4 — Office West", temp: 22.8, cost: 3950000 }
+                        ]
+                        onRowClicked: (rowData) => console.log("Clicked:", rowData.zone)
+                    }
+                }
+            
+                Rectangle { width: parent.width; height: 1; color: ThemeManager.borderDefault }
+
+                // ---------- AppTextInput ----------
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 14
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "AppTextInput" }
+
+                    AppTextInput {
+                        label: "Zone Name"
+                        placeholderText: "Enter zone name"
+                        helperText: "Shown to technicians on the maintenance queue"
+                    }
+
+                    AppTextInput {
+                        label: "Zone Name (error)"
+                        placeholderText: "Enter zone name"
+                        validationState: "error"
+                        errorMessage: "Zone name is required"
+                        text: ""
+                    }
+
+                    AppTextInput {
+                        label: "Zone Name (success)"
+                        text: "Zone 3 — Office East"
+                        validationState: "success"
+                        helperText: "Looks good"
+                    }
+
+                    AppTextInput {
+                        label: "Zone Name (disabled)"
+                        text: "Locked field"
+                        enabled: false
+                    }
+                }
+            
+                Rectangle { width: parent.width; height: 1; color: ThemeManager.borderDefault }
+
+                // ---------- Skeleton + Keycap ----------
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 14
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "Skeleton + Keycap" }
+
+                    Column {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 8
+                        Skeleton { width: 220; height: 14 }
+                        Skeleton { width: 180; height: 14 }
+                        Skeleton { variant: "block"; width: 220; height: 100 }
+                    }
+
+                    Row {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 6
+                        Keycap { text: "Ctrl" }
+                        AppText { text: "+"; variant: "caption"; anchors.verticalCenter: parent.verticalCenter }
+                        Keycap { text: "K" }
+                    }
+                }
             }
         }
     }
