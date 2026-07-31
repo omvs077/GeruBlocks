@@ -16,6 +16,9 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2)
 
 qt_standard_project_setup()
 
+qt_policy(SET QTP0001 NEW)
+qt_policy(SET QTP0004 NEW)
+
 qt_add_executable(GeruBlocksApp
     src/main.cpp
 )
@@ -26,6 +29,16 @@ qt_add_resources(GeruBlocksApp "fonts"
         assets/fonts/Poppins-Regular.ttf
         assets/fonts/Poppins-Medium.ttf
         assets/fonts/Poppins-SemiBold.ttf
+)
+
+# ToastManager and CommandRegistry use `pragma Singleton` in the QML file itself,
+# but that pragma alone is NOT enough to register them as singletons with
+# qt_add_qml_module — this property must be set explicitly, BEFORE the
+# qt_add_qml_module() call below.
+set_source_files_properties(
+    qml/Components/ToastManager.qml
+    qml/Components/CommandRegistry.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
 
 qt_add_qml_module(GeruBlocksApp
@@ -45,6 +58,13 @@ qt_add_qml_module(GeruBlocksApp
     qml/Components/AppTextInput.qml
     qml/Components/Skeleton.qml
     qml/Components/Keycap.qml
+    qml/Components/NavItem.qml
+    qml/Components/Dialog.qml
+    qml/Components/ToastManager.qml
+    qml/Components/ToastHost.qml
+    qml/Components/CommandRegistry.qml
+    qml/Components/CommandPalette.qml
+
     SOURCES
         src/Core/ThemeManager.h
         src/Core/ThemeManager.cpp

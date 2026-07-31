@@ -18,11 +18,61 @@ Window {
     title: "Geru Blocks — Test Harness"
     color: ThemeManager.backgroundPage
 
+    Basic.Button {
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: "Open Test Dialog"
+        onClicked: testDialog.open()
+    }
+
     property bool showIconGallery: false
 
     Loader {
         anchors.fill: parent
         sourceComponent: window.showIconGallery ? galleryComponent : mainComponent
+    }
+
+    // ---------- NEW: overlays, sit above everything ----------
+    Dialog {
+        id: testDialog
+        title: "Confirm Action"
+        Text {
+            text: "Are you sure you want to proceed?"
+            color: ThemeManager.textSecondary
+            font.family: "Poppins"
+            font.pixelSize: 13
+            wrapMode: Text.WordWrap
+            width: 350
+        }
+        footer: Component {
+            Row {
+                spacing: 8
+                anchors.right: parent.right
+                Button { text: "Cancel"; variant: "ghost"; onClicked: testDialog.close() }
+                Button {
+                    text: "Confirm"; variant: "primary"
+                    onClicked: {
+                        testDialog.close()
+                        ToastManager.show("Action confirmed", "success")
+                    }
+                }
+            }
+        }
+    }
+
+    ToastHost {}
+
+    CommandPalette {}
+
+    Component.onCompleted: {
+        CommandRegistry.register("open-dialog", "Open Test Dialog", "Actions", "external_link", "", function() {
+            testDialog.open()
+        })
+        CommandRegistry.register("toast-success", "Show Success Toast", "Actions", "checkmark", "", function() {
+            ToastManager.show("This is a success toast", "success")
+        })
+        CommandRegistry.register("toast-error", "Show Error Toast", "Actions", "close", "", function() {
+            ToastManager.show("This is an error toast", "error")
+        })
     }
 
     Component {
@@ -314,6 +364,27 @@ Window {
                         Keycap { text: "Ctrl" }
                         AppText { text: "+"; variant: "caption"; anchors.verticalCenter: parent.verticalCenter }
                         Keycap { text: "K" }
+                    }
+                }
+
+                Rectangle { width: parent.width; height: 1; color: ThemeManager.borderDefault }
+
+                // ---------- NavItem ----------
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 8
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "NavItem" }
+                    Rectangle {
+                        width: 220; height: 3 * 40
+                        color: ThemeManager.backgroundSurface
+                        border.width: 1
+                        border.color: ThemeManager.borderDefault
+                        Column {
+                            anchors.fill: parent
+                            NavItem { iconName: "home"; label: "Dashboard"; selected: true }
+                            NavItem { iconName: "settings"; label: "Settings" }
+                            NavItem { iconName: "users"; label: "Users" }
+                        }
                     }
                 }
             }

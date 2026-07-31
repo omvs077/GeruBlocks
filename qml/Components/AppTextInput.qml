@@ -52,7 +52,6 @@ Column {
 
     property alias text: field.text
     property alias placeholderText: field.placeholderText
-    property alias enabled: field.enabled
 
     signal editingFinished()
 
@@ -72,6 +71,7 @@ Column {
         Basic.TextField {
             id: field
             anchors.fill: parent
+            enabled: root.enabled
             selectByMouse: true
             font.family: "Poppins"
             font.pixelSize: 14
