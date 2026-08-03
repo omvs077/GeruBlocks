@@ -21,14 +21,25 @@ Window {
     Basic.Button {
         anchors.horizontalCenter: parent.horizontalCenter
         text: "Open Test Dialog"
+        z: 10
         onClicked: testDialog.open()
     }
 
+    Basic.Button {
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.margins: 8
+        z: 10
+        text: window.showAppShell ? "\u2190 Back to Test Harness" : "View AppShell \u2192"
+        onClicked: window.showAppShell = !window.showAppShell
+    }
+
     property bool showIconGallery: false
+    property bool showAppShell: false
 
     Loader {
         anchors.fill: parent
-        sourceComponent: window.showIconGallery ? galleryComponent : mainComponent
+        sourceComponent: window.showIconGallery ? galleryComponent : (window.showAppShell ? appShellComponent : mainComponent)
     }
 
     // ---------- NEW: overlays, sit above everything ----------
@@ -87,6 +98,11 @@ Window {
                 onClicked: window.showIconGallery = false
             }
         }
+    }
+
+    Component {
+        id: appShellComponent
+        AppShell {}
     }
 
     Component {
@@ -253,9 +269,9 @@ Window {
                         spacing: 16
 
                         Card {
-                            title: "Zone 3 — AHU Status"
+                            title: "Project Alpha — Status"
                             Text {
-                                text: "Online, 21°C"
+                                text: "Active, 3 members"
                                 color: ThemeManager.textSecondary
                                 font.family: "Poppins"
                                 font.pixelSize: 13
@@ -292,17 +308,17 @@ Window {
                         width: 500
                         height: 300
                         columns: [
-                            { key: "zone", title: "Zone" },
-                            { key: "temp", title: "Temp (°C)", numeric: true, decimals: 1 },
-                            { key: "cost", title: "Monthly Cost", numeric: true, currency: true }
+                            { key: "project", title: "Project" },
+                            { key: "progress", title: "Progress (%)", numeric: true, decimals: 1 },
+                            { key: "budget", title: "Monthly Budget", numeric: true, currency: true }
                         ]
                         rows: [
-                            { zone: "Zone 1 — Lobby", temp: 21.5, cost: 4500000 },
-                            { zone: "Zone 2 — Server Room", temp: 18.2, cost: 12300000 },
-                            { zone: "Zone 3 — Office East", temp: 23.1, cost: 3800000 },
-                            { zone: "Zone 4 — Office West", temp: 22.8, cost: 3950000 }
+                            { project: "Website Redesign", progress: 72.5, budget: 4500000 },
+                            { project: "Mobile App", progress: 45.0, budget: 12300000 },
+                            { project: "API Migration", progress: 88.0, budget: 3800000 },
+                            { project: "Data Pipeline", progress: 33.5, budget: 3950000 }
                         ]
-                        onRowClicked: (rowData) => console.log("Clicked:", rowData.zone)
+                        onRowClicked: (rowData) => console.log("Clicked:", rowData.project)
                     }
                 }
             
@@ -315,28 +331,28 @@ Window {
                     AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "AppTextInput" }
 
                     AppTextInput {
-                        label: "Zone Name"
-                        placeholderText: "Enter zone name"
-                        helperText: "Shown to technicians on the maintenance queue"
+                        label: "Project Name"
+                        placeholderText: "Enter project name"
+                        helperText: "Shown to team members on the project board"
                     }
 
                     AppTextInput {
-                        label: "Zone Name (error)"
-                        placeholderText: "Enter zone name"
+                        label: "Project Name (error)"
+                        placeholderText: "Enter project name"
                         validationState: "error"
-                        errorMessage: "Zone name is required"
+                        errorMessage: "Project name is required"
                         text: ""
                     }
 
                     AppTextInput {
-                        label: "Zone Name (success)"
-                        text: "Zone 3 — Office East"
+                        label: "Project Name (success)"
+                        text: "Website Redesign"
                         validationState: "success"
                         helperText: "Looks good"
                     }
 
                     AppTextInput {
-                        label: "Zone Name (disabled)"
+                        label: "Project Name (disabled)"
                         text: "Locked field"
                         enabled: false
                     }

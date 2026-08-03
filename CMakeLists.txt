@@ -64,6 +64,7 @@ qt_add_qml_module(GeruBlocksApp
     qml/Components/ToastHost.qml
     qml/Components/CommandRegistry.qml
     qml/Components/CommandPalette.qml
+    qml/Components/AppShell.qml
 
     SOURCES
         src/Core/ThemeManager.h
