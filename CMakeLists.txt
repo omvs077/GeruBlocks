@@ -12,7 +12,7 @@ if(DEFINED ENV{QT_DIR})
     set(CMAKE_PREFIX_PATH "$ENV{QT_DIR}")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 QuickDialogs2)
 
 qt_standard_project_setup()
 
@@ -72,6 +72,11 @@ qt_add_qml_module(GeruBlocksApp
     qml/Components/SegmentedControl.qml
     qml/Components/AppSlider.qml
     qml/Components/NumberStepper.qml
+    qml/Components/Select.qml
+    qml/Components/AppTextArea.qml
+    qml/Components/AppCombobox.qml
+    qml/Components/FileDropzone.qml
+    qml/Components/DatePicker.qml
 
     SOURCES
         src/Core/ThemeManager.h
@@ -87,6 +92,7 @@ target_link_libraries(GeruBlocksApp
         Qt6::Qml
         Qt6::Quick
         Qt6::QuickControls2
+        Qt6::QuickDialogs2
 )
 
 target_include_directories(GeruBlocksApp

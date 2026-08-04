@@ -438,6 +438,42 @@ Window {
 
                     NumberStepper { from: 0; to: 20; value: 4 }
                 }
+
+                Rectangle { width: parent.width; height: 1; color: ThemeManager.borderDefault }
+
+                // ---------- Step 6 batch: Form Inputs/Pickers (STUBS, 4 of 7) ----------
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 14
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "Step 6 — Form Inputs (stub batch, 4 of 7)" }
+
+                    Select {
+                        model: [
+                            { value: "eng", label: "Engineering" },
+                            { value: "des", label: "Design" },
+                            { value: "pm", label: "Product" }
+                        ]
+                    }
+
+                    AppTextArea {
+                        width: 260
+                        height: 80
+                        placeholderText: "Enter a description..."
+                    }
+
+                    AppCombobox {
+                        placeholderText: "Search users..."
+                        options: [
+                            { value: "u1", label: "Aditi Sharma" },
+                            { value: "u2", label: "Rahul Verma" },
+                            { value: "u3", label: "Priya Nair" }
+                        ]
+                    }
+
+                    FileDropzone {}
+
+                    DatePicker {}
+                }
             }
         }
     }
