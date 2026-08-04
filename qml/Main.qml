@@ -403,6 +403,41 @@ Window {
                         }
                     }
                 }
+
+                Rectangle { width: parent.width; height: 1; color: ThemeManager.borderDefault }
+
+                // ---------- Step 5 batch: Form Selection (STUBS) ----------
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 14
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "Step 5 — Form Selection (stub batch)" }
+
+                    AppCheckbox { text: "Enable notifications" }
+                    AppCheckbox { text: "Pre-checked"; checked: true }
+
+                    AppRadioGroup {
+                        model: [
+                            { value: "low", label: "Low priority" },
+                            { value: "med", label: "Medium priority" },
+                            { value: "high", label: "High priority" }
+                        ]
+                    }
+
+                    AppSwitch { text: "Dark mode override" }
+
+                    SegmentedControl {
+                        width: 300
+                        options: [
+                            { value: "day", label: "Day" },
+                            { value: "week", label: "Week" },
+                            { value: "month", label: "Month" }
+                        ]
+                    }
+
+                    AppSlider { width: 260 }
+
+                    NumberStepper { from: 0; to: 20; value: 4 }
+                }
             }
         }
     }

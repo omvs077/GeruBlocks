@@ -65,6 +65,13 @@ qt_add_qml_module(GeruBlocksApp
     qml/Components/CommandRegistry.qml
     qml/Components/CommandPalette.qml
     qml/Components/AppShell.qml
+    qml/Components/AppCheckbox.qml
+    qml/Components/AppRadioButton.qml
+    qml/Components/AppRadioGroup.qml
+    qml/Components/AppSwitch.qml
+    qml/Components/SegmentedControl.qml
+    qml/Components/AppSlider.qml
+    qml/Components/NumberStepper.qml
 
     SOURCES
         src/Core/ThemeManager.h
