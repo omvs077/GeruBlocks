@@ -473,6 +473,8 @@ Window {
                     FileDropzone {}
 
                     DatePicker {}
+
+                    TimePicker {}
                 }
             }
         }

@@ -77,6 +77,7 @@ qt_add_qml_module(GeruBlocksApp
     qml/Components/AppCombobox.qml
     qml/Components/FileDropzone.qml
     qml/Components/DatePicker.qml
+    qml/Components/TimePicker.qml
 
     SOURCES
         src/Core/ThemeManager.h
