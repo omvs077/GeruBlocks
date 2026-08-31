@@ -33,12 +33,26 @@ import GeruBlocks
 // of density, and TextInput follows that same precedent for consistency
 // — not something the spec states explicitly for form fields.
 //
+// STEP 6 FOLLOW-UP — validation metadata + password mode:
+//   AppTextInput stays a "dumb" field. It does NOT validate itself.
+//   validationType / minLength / maxLength / validator are just metadata
+//   that Form.qml reads and acts on — consistent with the thin-wrapper
+//   design where Form owns all validation logic.
+//     validationType: "text" | "email" | "password" | "custom"
+//     minLength / maxLength: optional ints
+//     validator: optional function(value) -> true | "error message",
+//       e.g. for confirm-password matching another field's text.
+//   masked: renders as a password field. Uses a TEXT-based Show/Hide
+//   toggle rather than an eye icon — no confirmed icon name for that
+//   exists in the 252-icon set yet. Swap to Icon{} once one is verified
+//   (see the project's own note on not guessing icon names).
+//
 // Usage:
-//   TextInput {
-//       label: "Zone Name"
-//       placeholderText: "Enter zone name"
-//       validationState: "error"
-//       errorMessage: "Zone name is required"
+//   AppTextInput {
+//       label: "Password"
+//       validationType: "password"
+//       required: true
+//       masked: true
 //   }
 
 Column {
@@ -49,6 +63,18 @@ Column {
     property string errorMessage: ""
     // "default" | "error" | "success"
     property string validationState: "default"
+    property bool required: false
+
+    // Validation metadata, consumed by Form.qml — not enforced here.
+    // "text" | "email" | "password" | "custom"
+    property string validationType: "text"
+    property var minLength: undefined
+    property var maxLength: undefined
+    property var validator: null
+
+    // Password mode
+    property bool masked: false
+    property bool _revealed: false
 
     property alias text: field.text
     property alias placeholderText: field.placeholderText
@@ -77,7 +103,8 @@ Column {
             font.pixelSize: 14
             color: enabled ? ThemeManager.textPrimary : ThemeManager.textSecondary
             leftPadding: ThemeManager.spacing12
-            rightPadding: ThemeManager.spacing12
+            rightPadding: root.masked ? ThemeManager.spacing48 : ThemeManager.spacing12
+            echoMode: (root.masked && !root._revealed) ? Basic.TextField.Password : Basic.TextField.Normal
             onEditingFinished: root.editingFinished()
 
             background: Rectangle {
@@ -98,6 +125,24 @@ Column {
                         easing.bezierCurve: ThemeManager.easingCurve
                     }
                 }
+            }
+        }
+
+        // Show/Hide toggle for masked (password) fields.
+        AppText {
+            visible: root.masked
+            text: root._revealed ? "Hide" : "Show"
+            variant: "caption"
+            color: ThemeManager.accentPrimary
+            anchors.right: parent.right
+            anchors.rightMargin: ThemeManager.spacing12
+            anchors.verticalCenter: parent.verticalCenter
+
+            MouseArea {
+                anchors.fill: parent
+                anchors.margins: -6
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root._revealed = !root._revealed
             }
         }
 

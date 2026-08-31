@@ -11,6 +11,12 @@ import GeruBlocks
 // resolved here.
 // NEW DEPENDENCY: this file requires the Qt6::QuickDialogs2 module,
 // which is NOT yet in CMakeLists.txt — see accompanying CMake edit.
+//
+// VALIDATION-GAP FOLLOW-UP: adds validationState/errorMessage/required
+// plus a `value` alias to the existing selectedFiles property. An empty
+// array now counts as "empty" for required-checking — Form.qml's
+// _isEmpty was extended to check array length, not just undefined/
+// null/"".
 
 Rectangle {
     id: root
@@ -19,10 +25,21 @@ Rectangle {
     radius: 0
     color: dropArea.containsDrag ? ThemeManager.backgroundPage : ThemeManager.backgroundSurface
     border.width: 1
-    border.color: dropArea.containsDrag ? ThemeManager.accentPrimary : ThemeManager.borderStrong
+    border.color: {
+        if (dropArea.containsDrag) return ThemeManager.accentPrimary
+        if (root.validationState === "error") return ThemeManager.statusError
+        if (root.validationState === "success") return ThemeManager.statusSuccess
+        return ThemeManager.borderStrong
+    }
 
     property var selectedFiles: []
+    property alias value: root.selectedFiles
     signal filesDropped(var urls)
+
+    property string errorMessage: ""
+    // "default" | "error" | "success"
+    property string validationState: "default"
+    property bool required: false
 
     Column {
         anchors.centerIn: parent

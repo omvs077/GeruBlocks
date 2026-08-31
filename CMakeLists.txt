@@ -78,6 +78,55 @@ qt_add_qml_module(GeruBlocksApp
     qml/Components/FileDropzone.qml
     qml/Components/DatePicker.qml
     qml/Components/TimePicker.qml
+    qml/Components/Form.qml
+    qml/Components/AppPhoneInput.qml
+    qml/Components/IconButton.qml
+    qml/Components/IconButton.qml
+    qml/Components/ButtonGroup.qml
+    qml/Components/SplitButton.qml
+    qml/Components/DropdownMenu.qml
+    qml/Components/ContextMenu.qml
+    qml/Components/MenuBar.qml
+    qml/Components/Tabs.qml
+    qml/Components/Breadcrumbs.qml
+    qml/Components/Pagination.qml
+    qml/Components/Accordion.qml
+    qml/Components/AccordionSection.qml
+    qml/Components/AppTreeView.qml
+    qml/Components/TreeNode.qml
+    qml/Components/Stepper.qml
+    qml/Components/Tooltip.qml
+    qml/Components/Popover.qml
+    qml/Components/Drawer.qml
+    qml/Components/Coachmark.qml
+    qml/Components/ProgressBar.qml
+    qml/Components/Spinner.qml
+    qml/Components/EmptyState.qml
+    qml/Components/InlineAlert.qml
+    qml/Components/StatusDot.qml
+    qml/Components/Divider.qml
+    qml/Components/Avatar.qml
+    qml/Components/AvatarGroup.qml
+    qml/Components/ListItem.qml
+    qml/Components/List.qml
+    qml/Components/StatTile.qml
+    qml/Components/RemovableTag.qml
+    qml/Components/Timeline.qml
+    qml/Components/KeyValue.qml
+    qml/Components/LineChart.qml
+    qml/Components/BarChart.qml
+    qml/Components/DonutChart.qml
+    qml/Components/Sparkline.qml
+    qml/Components/GaugeChart.qml
+    qml/Components/TitleBar.qml
+    qml/Components/ResizeBorders.qml
+    qml/Components/Toolbar.qml
+    qml/Components/StatusBar.qml
+    qml/Components/SplitPane.qml
+    qml/Components/Panel.qml
+    qml/Components/LayoutStack.qml
+    qml/Components/LayoutGrid.qml
+    qml/Components/ScrollArea.qml
 
     SOURCES
         src/Core/ThemeManager.h

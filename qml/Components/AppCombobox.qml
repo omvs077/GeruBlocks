@@ -12,14 +12,25 @@ import GeruBlocks
 // substring match, deliberately NOT CommandPalette's subsequence fuzzy
 // scorer — that scorer suits command search, not form-filling
 // predictability. Revisit only if you want the two made consistent.
+//
+// VALIDATION-GAP FOLLOW-UP: adds validationState/errorMessage/required
+// plus a `value` alias to the existing currentValue property, since
+// Form.qml's contract looks for `.text` or `.value` and root (a plain
+// Item) previously exposed neither.
 
 Item {
     id: root
 
     property var options: []  // [{value, label}]
     property string currentValue: ""
+    property alias value: root.currentValue
     property alias placeholderText: input.placeholderText
     property var _filtered: options
+
+    property string errorMessage: ""
+    // "default" | "error" | "success"
+    property string validationState: "default"
+    property bool required: false
 
     implicitWidth: 220
     implicitHeight: ThemeManager.controlHeight
@@ -44,7 +55,12 @@ Item {
         background: Rectangle {
             radius: 0
             border.width: 1
-            border.color: input.activeFocus ? ThemeManager.accentPrimary : ThemeManager.borderDefault
+            border.color: {
+                if (input.activeFocus) return ThemeManager.accentPrimary
+                if (root.validationState === "error") return ThemeManager.statusError
+                if (root.validationState === "success") return ThemeManager.statusSuccess
+                return ThemeManager.borderDefault
+            }
             color: ThemeManager.backgroundSurface
         }
         onTextChanged: { root._filter(); popup.open() }

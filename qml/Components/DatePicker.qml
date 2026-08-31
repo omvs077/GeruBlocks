@@ -42,6 +42,15 @@ Item {
     property int minYear: new Date().getFullYear() - 100
     property int maxYear: new Date().getFullYear() + 50
 
+    // VALIDATION-GAP FOLLOW-UP: added so Form.qml can find and
+    // validate this field. "value" aliases the existing selectedDate
+    // property (Form checks .text then .value).
+    property string errorMessage: ""
+    // "default" | "error" | "success"
+    property string validationState: "default"
+    property bool required: false
+    property alias value: root.selectedDate
+
     signal dateSelected(date newDate)
 
     implicitWidth: 220
@@ -101,7 +110,12 @@ Item {
         anchors.fill: parent
         radius: 0
         border.width: 1
-        border.color: triggerArea.containsMouse || popup.visible ? ThemeManager.accentPrimary : ThemeManager.borderDefault
+        border.color: {
+            if (triggerArea.containsMouse || popup.visible) return ThemeManager.accentPrimary
+            if (root.validationState === "error") return ThemeManager.statusError
+            if (root.validationState === "success") return ThemeManager.statusSuccess
+            return ThemeManager.borderDefault
+        }
         color: ThemeManager.backgroundSurface
 
         Row {

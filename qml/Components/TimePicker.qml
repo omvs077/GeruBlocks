@@ -34,6 +34,15 @@ Item {
     id: root
 
     property date selectedTime: new Date()
+
+    // VALIDATION-GAP FOLLOW-UP: added so Form.qml can find and
+    // validate this field. "value" aliases the existing selectedTime
+    // property (Form checks .text then .value).
+    property string errorMessage: ""
+    // "default" | "error" | "success"
+    property string validationState: "default"
+    property bool required: false
+    property alias value: root.selectedTime
     property int minuteStep: 5
 
     signal timeSelected(date newTime)
@@ -93,7 +102,12 @@ Item {
         anchors.fill: parent
         radius: 0
         border.width: 1
-        border.color: triggerArea.containsMouse || popup.visible ? ThemeManager.accentPrimary : ThemeManager.borderDefault
+        border.color: {
+            if (triggerArea.containsMouse || popup.visible) return ThemeManager.accentPrimary
+            if (root.validationState === "error") return ThemeManager.statusError
+            if (root.validationState === "success") return ThemeManager.statusSuccess
+            return ThemeManager.borderDefault
+        }
         color: ThemeManager.backgroundSurface
 
         Row {

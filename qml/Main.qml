@@ -14,32 +14,75 @@ Window {
     id: window
     width: 900
     height: 800
+    minimumWidth: 480   // PROPOSAL: not set previously; a frameless window with no OS-enforced
+    minimumHeight: 320  // minimum can be resized down to nothing via ResizeBorders. Adjust if needed.
     visible: true
     title: "Geru Blocks — Test Harness"
     color: ThemeManager.backgroundPage
 
-    Basic.Button {
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: "Open Test Dialog"
-        z: 10
-        onClicked: testDialog.open()
-    }
-
-    Basic.Button {
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.margins: 8
-        z: 10
-        text: window.showAppShell ? "\u2190 Back to Test Harness" : "View AppShell \u2192"
-        onClicked: window.showAppShell = !window.showAppShell
-    }
+    // Step 13: frameless window — TitleBar.qml + ResizeBorders.qml replace the native
+    // OS chrome entirely. See Step13_Integration_Notes.md for the full rationale
+    // (in particular: no Qt.WA_TranslucentBackground is needed here, since the sharp-
+    // corners rule means the window is always a plain rectangle — nothing to anti-alias).
+    flags: Qt.Window | Qt.FramelessWindowHint
 
     property bool showIconGallery: false
     property bool showAppShell: false
 
-    Loader {
+    // ---------- Chrome: title bar + content workspace ----------
+    Rectangle {
+        id: chromeRoot
         anchors.fill: parent
-        sourceComponent: window.showIconGallery ? galleryComponent : (window.showAppShell ? appShellComponent : mainComponent)
+        color: ThemeManager.backgroundPage
+        // Substitute for the native window frame outline, lost along with the native
+        // chrome. Hidden when maximized since the OS already snaps the window exactly
+        // to the monitor work-area at that point — a native frame wouldn't show one either.
+        border.width: window.visibility === Window.Maximized ? 0 : 1
+        border.color: ThemeManager.borderDefault
+
+        TitleBar {
+            id: titleBar
+            width: parent.width
+            title: window.title
+        }
+
+        Item {
+            id: workspace
+            anchors.top: titleBar.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+
+            Basic.Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "Open Test Dialog"
+                z: 10
+                onClicked: testDialog.open()
+            }
+
+            Basic.Button {
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.margins: 8
+                z: 10
+                text: window.showAppShell ? "\u2190 Back to Test Harness" : "View AppShell \u2192"
+                onClicked: window.showAppShell = !window.showAppShell
+            }
+
+            Loader {
+                anchors.fill: parent
+                sourceComponent: window.showIconGallery ? galleryComponent : (window.showAppShell ? appShellComponent : mainComponent)
+            }
+        }
+    }
+
+    // Resize hit-zones for the frameless window — must sit at the Window level (not
+    // inside chromeRoot/workspace) per the same rule as toast/dialog hosts: overlays
+    // that need to catch input across the whole window belong at the top, not nested
+    // inside scrolling/content items (handoff doc, Section 5 carried-forward notes).
+    ResizeBorders {
+        anchors.fill: parent
+        visible: window.visibility !== Window.Maximized
     }
 
     // ---------- NEW: overlays, sit above everything ----------
@@ -73,6 +116,16 @@ Window {
     ToastHost {}
 
     CommandPalette {}
+
+    Drawer 
+    {
+        id: testDrawer
+        edge: "left"
+        drawerWidth: 280
+        Heading { text: "Filters"; variant: "subheader" }
+        AppCheckbox { text: "Active only" }
+        AppCheckbox { text: "My projects" }
+     }
 
     Component.onCompleted: {
         CommandRegistry.register("open-dialog", "Open Test Dialog", "Actions", "external_link", "", function() {
@@ -142,7 +195,10 @@ Window {
                         height: ThemeManager.controlHeight
                         radius: 0
                         color: themeToggleArea.pressed ? ThemeManager.accentPrimaryPressed : ThemeManager.accentPrimary
-                        border.width: ThemeManager.borderWidthDefault
+                        border.width: 1 // FIXED: was ThemeManager.borderWidthDefault, which doesn't exist on
+                                        // ThemeManager (not in the confirmed grep'd property list — see handoff
+                                        // doc). Was silently resolving to undefined at runtime. Every other
+                                        // hairline border in this file just uses a literal 1, matched here.
                         border.color: ThemeManager.borderDefault
 
                         Text {
@@ -470,11 +526,522 @@ Window {
                         ]
                     }
 
-                    FileDropzone {}
-
                     DatePicker {}
 
                     TimePicker {}
+
+                    Form {
+                        id: testForm
+                        width: 280
+
+                        AppCheckbox {
+                            text: "I agree to the terms"
+                            required: true
+                        }
+
+                        FileDropzone {
+                            required: true
+                        }
+
+                        AppTextInput {
+                            label: "Project Name"
+                            placeholderText: "Enter project name"
+                            required: true
+                        }
+
+                        AppTextInput {
+                            label: "Company Name"
+                            placeholderText: "Optional"
+                            helperText: "Leave blank if not applicable"
+                            // no `required` — defaults to false
+                        }
+
+                        AppTextInput {
+                            id: emailField
+                            label: "Owner Email"
+                            placeholderText: "name@company.com"
+                            validationType: "email"
+                            required: true
+                        }
+
+                        AppTextInput {
+                            id: passwordField
+                            label: "Password"
+                            placeholderText: "Choose a password"
+                            validationType: "password"
+                            masked: true
+                            required: true
+                        }
+
+                        AppTextInput {
+                            label: "Confirm Password"
+                            placeholderText: "Re-enter password"
+                            masked: true
+                            required: true
+                            validator: function(value) {
+                                return value === passwordField.text || "Passwords do not match"
+                            }
+                        }
+
+                        AppPhoneInput {
+                            label: "Phone Number"
+                            required: true
+                        }
+
+                        onAccepted: console.log("Form submitted OK")
+                        onRejected: (errors) => console.log("Form has", errors.length, "error(s)")
+                    }
+
+                    Button {
+                        text: "Submit"
+                        onClicked: testForm.submit()
+                    }
+                }
+
+                Rectangle { width: parent.width; height: 1; color: ThemeManager.borderDefault }
+
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 14
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "Step 7 — Actions & Menus (batch 1 of 2)" }
+
+                    Row {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 16
+
+                        IconButton { iconName: "settings"; onClicked: console.log("Settings clicked") }
+
+                        ButtonGroup {
+                            IconButton { iconName: "grid" }
+                            IconButton { iconName: "list_bulleted" }
+                        }
+
+                        SplitButton {
+                            text: "Save"
+                            variant: "primary"
+                            onClicked: console.log("Save clicked")
+                            menuItems: [
+                                { label: "Save As...", onTriggered: function() { console.log("Save As") } },
+                                { label: "Save a Copy", iconName: "close", onTriggered: function() { console.log("Save a Copy") } }
+                            ]
+                        }
+                    }
+
+                    Row {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 16
+
+                        Card {
+                            id: contextTestCard
+                            title: "Right-click me"
+                            Text {
+                                text: "Left-click should still work too"
+                                color: ThemeManager.textSecondary
+                                font.family: "Poppins"
+                                font.pixelSize: 13
+                            }
+                            onClicked: console.log("Card left-clicked normally")
+
+                            ContextMenu {
+                                attachedTo: contextTestCard
+                                items: [
+                                    { label: "Rename", onTriggered: function() { console.log("Rename") } },
+                                    { label: "Delete", iconName: "close", onTriggered: function() { console.log("Delete") } }
+                                ]
+                            }
+                        }
+                    }
+                }
+
+                Rectangle { width: parent.width; height: 1; color: ThemeManager.borderDefault }
+
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 14
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "Step 7 — Menu Bar" }
+
+                    MenuBar {
+                        width: 400
+                        menus: [
+                            { label: "File", mnemonic: "F", items: [
+                                { label: "New Project", onTriggered: function() { console.log("New Project") } },
+                                { label: "Open...", onTriggered: function() { console.log("Open") } }
+                            ]},
+                            { label: "Edit", mnemonic: "E", items: [
+                                { label: "Undo", onTriggered: function() { console.log("Undo") } },
+                                { label: "Redo", onTriggered: function() { console.log("Redo") } }
+                            ]},
+                            { label: "View", mnemonic: "V", items: [
+                                { label: "Zoom In", onTriggered: function() { console.log("Zoom In") } },
+                                { label: "Zoom Out", onTriggered: function() { console.log("Zoom Out") } }
+                            ]}
+                        ]
+                    }
+                }
+                Rectangle { width: parent.width; height: 1; color: ThemeManager.borderDefault }
+
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 20
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "Step 8 — Navigation" }
+
+                    Tabs {
+                        id: navTabs
+                        model: [{ label: "Overview" }, { label: "Files" }, { label: "Settings", iconName: "settings" }]
+                    }
+
+                    Breadcrumbs {
+                        model: ["Dashboard", "Projects", "Website Redesign"]
+                        onCrumbClicked: (i) => console.log("Breadcrumb", i)
+                    }
+
+                    Pagination {
+                        totalPages: 12
+                        currentPage: 5
+                        onPageChanged: (p) => console.log("Page", p)
+                    }
+
+                    Stepper {
+                        width: 320
+                        currentIndex: 1
+                        steps: ["Account", "Details", "Confirm"]
+                    }
+
+                    Accordion {
+                        width: 320
+                        AccordionSection {
+                            title: "Project Details"
+                            expanded: true
+                            AppText { text: "Basic info goes here." }
+                        }
+                        AccordionSection {
+                            title: "Advanced Settings"
+                            AppCheckbox { text: "Enable notifications" }
+                        }
+                    }
+
+                    AppTreeView {
+                        width: 260
+                        model: [
+                            { label: "Website Redesign", iconName: "folder", expanded: true, children: [
+                                { label: "Homepage" },
+                                { label: "Assets", children: [
+                                    { label: "logo.svg" }
+                                ]}
+                            ]},
+                            { label: "Mobile App", iconName: "folder" }
+                        ]
+                        onNodeClicked: (n) => console.log("Clicked", n.label)
+                    }
+                }
+                Rectangle { width: parent.width; height: 1; color: ThemeManager.borderDefault }
+
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 20
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "Step 9 — Transient Overlays" }
+
+                    Row {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 40
+
+                        IconButton {
+                            id: tooltipBtn
+                            iconName: "settings"
+                            Tooltip { anchorItem: tooltipBtn; text: "Settings" }
+                        }
+
+                        IconButton {
+                            id: popoverBtn
+                            iconName: "grid"
+                            onClicked: quickPopover.open()
+                            Popover {
+                                id: quickPopover
+                                anchorItem: popoverBtn
+                                AppText { text: "Quick settings"; variant: "subtitle" }
+                                AppSwitch { text: "Dark mode" }
+                            }
+                        }
+
+                        Button {
+                            text: "Open Drawer"
+                            onClicked: testDrawer.open()
+                        }
+
+                        IconButton {
+                            id: coachmarkBtn
+                            iconName: "checkmark"
+                            onClicked: testCoachmark.visible = !testCoachmark.visible
+                        }
+                    }
+
+                    Coachmark {
+                        id: testCoachmark
+                        anchorItem: coachmarkBtn
+                        side: "bottom"
+                        visible: false
+                        title: "New: Quick Actions"
+                        body: "Click here anytime to jump to your recent items."
+                        step: 2
+                        totalSteps: 4
+                        onNext: console.log("Coachmark next")
+                        onDismissed: testCoachmark.visible = false
+                    }
+                }
+                Rectangle { width: parent.width; height: 1; color: ThemeManager.borderDefault }
+
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 20
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "Step 10 — Feedback & Status" }
+
+                    ProgressBar { width: 260; value: 0.65 }
+                    ProgressBar { width: 260; indeterminate: true }
+
+                    Row {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 24
+                        Spinner { size: 28 }
+                        StatusDot { status: "success" }
+                        StatusDot { status: "error"; pulse: true }
+                        StatusDot { status: "pending"; pulse: true }
+                    }
+
+                    InlineAlert {
+                        width: 320
+                        variant: "success"
+                        text: "Project saved successfully."
+                        dismissible: true
+                    }
+
+                    InlineAlert {
+                        width: 320
+                        variant: "error"
+                        text: "Failed to sync — check your connection and try again."
+                    }
+
+                    EmptyState {
+                        iconName: "folder"
+                        title: "No projects yet"
+                        body: "Create your first project to get started."
+                        actionText: "New Project"
+                        onActionClicked: console.log("New Project clicked")
+                    }
+                }
+                Rectangle { width: parent.width; height: 1; color: ThemeManager.borderDefault }
+
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 20
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "Step 11 — Data Display" }
+
+                    Row {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 24
+
+                        Avatar { name: "Priya Nair"; size: 40 }
+                        AvatarGroup {
+                            people: [
+                                { name: "Priya Nair" }, { name: "Rahul Verma" },
+                                { name: "Aditi Sharma" }, { name: "Sanjay Gupta" }
+                            ]
+                            maxVisible: 3
+                        }
+                    }
+
+                    Row {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 16
+                        StatTile { label: "Active Projects"; value: "24" }
+                        StatTile { label: "Monthly Revenue"; value: "₹45,00,000"; trend: "up"; trendText: "+12% vs last month" }
+                    }
+
+                    Row {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 8
+                        RemovableTag { text: "Status: Active"; onRemoved: console.log("removed status") }
+                        RemovableTag { text: "Owner: Priya"; onRemoved: console.log("removed owner") }
+                    }
+
+                    List {
+                        width: 320
+                        ListItem {
+                            title: "Website Redesign"
+                            subtitle: "Updated 2 hours ago"
+                            leading: Avatar { name: "Priya Nair"; size: 32 }
+                            trailing: StatusDot { status: "success" }
+                        }
+                        ListItem {
+                            title: "Mobile App"
+                            subtitle: "Updated yesterday"
+                            leading: Avatar { name: "Rahul Verma"; size: 32 }
+                            trailing: StatusDot { status: "pending"; pulse: true }
+                        }
+                    }
+
+                    Timeline {
+                        width: 320
+                        items: [
+                            { time: "09:17 AM", title: "Project created", body: "by Priya Nair" },
+                            { time: "10:30 AM", title: "First task added" },
+                            { time: "02:48 PM", title: "Status changed to Active", current: true }
+                        ]
+                    }
+
+                    KeyValue {
+                        width: 320
+                        items: [
+                            { key: "Owner", value: "Priya Nair" },
+                            { key: "Created", value: "06/08/2026" },
+                            { key: "Status", value: "Active" }
+                        ]
+                    }
+
+                    Divider { width: 200 }
+                }
+                Rectangle { width: parent.width; height: 1; color: ThemeManager.borderDefault }
+
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 20
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "Step 12 — Charts" }
+
+                    LineChart {
+                        width: 300; height: 160
+                        chartData: [12, 19, 8, 25, 30, 22, 28]
+                        labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+                    }
+
+                    BarChart {
+                        width: 300; height: 160
+                        chartData: [45, 72, 88, 33, 60]
+                        labels: ["Website", "Mobile", "API", "Pipeline", "Docs"]
+                    }
+
+                    DonutChart {
+                        width: 140; height: 140
+                        centerLabel: "35"
+                        chartData: [
+                            { label: "Active", value: 24, color: ThemeManager.statusSuccess },
+                            { label: "Pending", value: 8 },
+                            { label: "Blocked", value: 3, color: ThemeManager.statusError }
+                        ]
+                    }
+
+                    Sparkline { width: 80; height: 24; chartData: [3,5,4,7,6,9,8] }
+                }
+                Rectangle { width: parent.width; height: 1; color: ThemeManager.borderDefault }
+
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 20
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "Step 13 — OS Window Chrome" }
+                    AppText {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        variant: "caption"
+                        text: "TitleBar + ResizeBorders live at the real Window root above — not repeated here."
+                    }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "Toolbar" }
+                    Toolbar {
+                        width: 360
+                        IconButton { iconName: "folder" }
+                        IconButton { iconName: "upload" }
+                        // NOTE: assumes Divider.qml exposes an "orientation" property ("vertical"/
+                        // "horizontal") — not verified against Divider.qml's actual source, only
+                        // against the existing horizontal Divider usage elsewhere in this file.
+                        // Flag if this property name doesn't exist.
+                        Divider { orientation: "vertical"; height: ThemeManager.controlHeight }
+                        IconButton { iconName: "settings" }
+                    }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "StatusBar" }
+                    StatusBar {
+                        width: 360
+                        StatusDot { status: "success" }
+                        AppText { text: "Connected"; variant: "caption" }
+                        rightContent: [
+                            AppText { text: "Ln 12, Col 4"; variant: "caption" },
+                            AppText { text: "100%"; variant: "caption" }
+                        ]
+                    }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "SplitPane" }
+                    SplitPane {
+                        width: 360
+                        height: 160
+                        orientation: "horizontal"
+                        first: Rectangle {
+                            color: ThemeManager.backgroundPanel
+                            AppText { anchors.centerIn: parent; text: "First pane" }
+                        }
+                        second: Rectangle {
+                            color: ThemeManager.backgroundSurface
+                            AppText { anchors.centerIn: parent; text: "Second pane" }
+                        }
+                    }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "Panel / Group-box" }
+                    Panel {
+                        width: 360
+                        title: "Details"
+                        trailingContent: IconButton { iconName: "settings" }
+                        AppText { text: "Basic project info goes here." }
+                        AppText { text: "Second line of content."; variant: "caption" }
+                    }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "LayoutStack" }
+                    Column {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 8
+
+                        LayoutStack {
+                            id: demoStack
+                            width: 360
+                            height: 80
+                            currentIndex: 0
+                            Rectangle { color: ThemeManager.accentPrimary; AppText { anchors.centerIn: parent; text: "Panel A"; color: "#FFFFFF" } }
+                            Rectangle { color: ThemeManager.statusSuccess; AppText { anchors.centerIn: parent; text: "Panel B"; color: "#FFFFFF" } }
+                            Rectangle { color: ThemeManager.statusError; AppText { anchors.centerIn: parent; text: "Panel C"; color: "#FFFFFF" } }
+                        }
+                        Row {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            spacing: 8
+                            Button { text: "A"; onClicked: demoStack.currentIndex = 0 }
+                            Button { text: "B"; onClicked: demoStack.currentIndex = 1 }
+                            Button { text: "C"; onClicked: demoStack.currentIndex = 2 }
+                        }
+                    }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "LayoutGrid" }
+                    LayoutGrid {
+                        width: 360
+                        columns: 3
+                        cellHeight: 64
+                        Rectangle { color: ThemeManager.backgroundPanel; border.width: 1; border.color: ThemeManager.borderDefault; AppText { anchors.centerIn: parent; text: "1" } }
+                        Rectangle { color: ThemeManager.backgroundPanel; border.width: 1; border.color: ThemeManager.borderDefault; AppText { anchors.centerIn: parent; text: "2" } }
+                        Rectangle { color: ThemeManager.backgroundPanel; border.width: 1; border.color: ThemeManager.borderDefault; AppText { anchors.centerIn: parent; text: "3" } }
+                        Rectangle { color: ThemeManager.backgroundPanel; border.width: 1; border.color: ThemeManager.borderDefault; AppText { anchors.centerIn: parent; text: "4" } }
+                        Rectangle { color: ThemeManager.backgroundPanel; border.width: 1; border.color: ThemeManager.borderDefault; AppText { anchors.centerIn: parent; text: "5" } }
+                    }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "ScrollArea" }
+                    ScrollArea {
+                        width: 360
+                        height: 120
+                        contentWidth: width
+                        contentHeight: scrollDemoColumn.height
+
+                        Column {
+                            id: scrollDemoColumn
+                            width: parent.width
+                            spacing: 8
+                            Repeater {
+                                model: 10
+                                delegate: AppText { text: "Scrollable row " + (index + 1) }
+                            }
+                        }
+                    }
                 }
             }
         }

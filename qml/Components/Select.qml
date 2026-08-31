@@ -12,6 +12,10 @@ import GeruBlocks
 // selection. Rewritten to match AppCombobox.qml's proven pattern:
 // bind directly to the raw array, use modelData, and explicitly set
 // currentIndex + close the popup on click.
+//
+// VALIDATION-GAP FOLLOW-UP: adds validationState/errorMessage/required.
+// No new value alias needed — ComboBox's native `currentValue` (from
+// valueRole) already satisfies Form.qml's contract as-is.
 
 Basic.ComboBox {
     id: root
@@ -21,13 +25,23 @@ Basic.ComboBox {
     textRole: "label"
     valueRole: "value"
 
+    property string errorMessage: ""
+    // "default" | "error" | "success"
+    property string validationState: "default"
+    property bool required: false
+
     implicitWidth: 220
     implicitHeight: ThemeManager.controlHeight
 
     background: Rectangle {
         radius: 0
         border.width: 1
-        border.color: root.activeFocus ? ThemeManager.accentPrimary : ThemeManager.borderDefault
+        border.color: {
+            if (root.activeFocus) return ThemeManager.accentPrimary
+            if (root.validationState === "error") return ThemeManager.statusError
+            if (root.validationState === "success") return ThemeManager.statusSuccess
+            return ThemeManager.borderDefault
+        }
         color: ThemeManager.backgroundSurface
     }
 
