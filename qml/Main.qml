@@ -115,13 +115,14 @@ Window {
 
     ToastHost {}
 
-    CommandPalette {}
+    CommandPalette { backdropSource: chromeRoot }
 
     Drawer 
     {
         id: testDrawer
         edge: "left"
         drawerWidth: 280
+        backdropSource: chromeRoot
         Heading { text: "Filters"; variant: "subheader" }
         AppCheckbox { text: "Active only" }
         AppCheckbox { text: "My projects" }

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls.Basic as Basic
+import QtQuick.Effects
 import GeruBlocks
 
 // CommandPalette — Step 4 Overlays & App Shell
@@ -11,25 +12,50 @@ import GeruBlocks
 // FUZZY MATCH ALGORITHM, FLAGGED AS A REASONABLE IMPLEMENTATION, NOT A
 // SPEC REQUIREMENT (the spec just says "Command Palette (Ctrl+K)," no
 // matching-algorithm detail): simplified subsequence scoring similar in
-// spirit to fzf/Sublime Text — query characters must appear in the
+// spirit to fzf/Sublime Text -- query characters must appear in the
 // target string in order (not necessarily contiguous), with consecutive
 // matches scoring higher than scattered ones. No external library, kept
 // intentionally simple rather than a full weighted/typo-tolerant fuzzy
 // matcher.
 //
-// Same scale+fade panel treatment as Dialog (duration.panel, 320ms),
-// and the same scoped-down-from-glass-recipe note applies here too — no
-// backdrop blur yet, same reasoning as Dialog.qml.
+// GLASS MATERIAL — backlog item 1c (signed off, "proof-of-material"):
+// same technique as Drawer.qml (see that file's header for the full
+// rationale) -- ShaderEffectSource captures a live texture of whatever
+// Item is passed as `backdropSource`, MultiEffect blurs it, and the
+// blurred result sits inside `panel`, offset by (-panel.x, -panel.y) and
+// clipped to panel's bounds. backdropSource defaults to null, so any
+// usage that doesn't pass it keeps the old fully-opaque look -- no
+// breaking API change.
+//
+// KNOWN MINOR LIMITATION, not yet resolved: unlike Drawer (which only
+// translates via x), this panel also SCALES during its open/close
+// transition (scale: 0.95 -> 1.0). The blur child inside panel scales
+// along with it, so the blur is very slightly misaligned during the
+// ~320ms transition -- it settles correctly once fully open/closed.
+// Not worth solving with a second capture pass for a sub-third-of-a-
+// second cosmetic wobble; flagging honestly rather than claiming it's
+// pixel-perfect throughout the animation.
+//
+// Same scale+fade panel treatment as Dialog (duration.panel, 320ms).
+// The scoped-down-from-glass-recipe note for the OTHER deferred overlays
+// (Dialog, ContextMenu, DropdownMenu, Coachmark) still applies -- those
+// remain unchanged, no backdrop blur yet.
 //
 // Usage: place ONE CommandPalette at the app root (eventually AppShell;
 // for now the test harness). Ctrl+K toggles it globally. Register
 // commands from anywhere via CommandRegistry.register(...).
+//   CommandPalette { backdropSource: chromeRoot }   // NEW -- omit for old opaque look
 
 Item {
     id: root
 
     property int _selectedIndex: 0
     property var _filteredResults: []
+
+    // NEW (backlog 1c): the real app-content Item sitting behind this
+    // overlay, to be captured + blurred. null (default) = old opaque
+    // behavior, no blur.
+    property Item backdropSource: null
 
     function open() {
         searchField.text = ""
@@ -99,6 +125,20 @@ Item {
         MouseArea { anchors.fill: parent; onClicked: root.close() }
     }
 
+    // Live capture of whatever's behind this overlay -- see Drawer.qml's
+    // header for the full rationale. Only live while backdropSource is
+    // supplied and the palette is actually open.
+    ShaderEffectSource {
+        id: bgCapture
+        sourceItem: root.backdropSource
+        live: root.backdropSource !== null && root.visible
+        hideSource: false
+        recursive: false
+        visible: false
+        width: root.backdropSource ? root.backdropSource.width : 1
+        height: root.backdropSource ? root.backdropSource.height : 1
+    }
+
     Rectangle {
         id: panel
         anchors.horizontalCenter: parent.horizontalCenter
@@ -106,9 +146,12 @@ Item {
         width: 520
         height: Math.min(420, 60 + resultsList.contentHeight)
         radius: 0
-        color: ThemeManager.backgroundSurface
+        color: "transparent"  // tint is a child Rectangle below -- see Drawer.qml LAYERING NOTE
         border.width: 1
-        border.color: ThemeManager.borderDefault
+        border.color: root.backdropSource
+            ? Qt.rgba(ThemeManager.accentPrimary.r, ThemeManager.accentPrimary.g, ThemeManager.accentPrimary.b, 0.5)
+            : ThemeManager.borderDefault
+        clip: true
 
         scale: root.visible ? 1.0 : 0.95
         opacity: root.visible ? 1.0 : 0.0
@@ -126,6 +169,31 @@ Item {
                 easing.type: Easing.BezierSpline
                 easing.bezierCurve: ThemeManager.easingCurve
             }
+        }
+
+        // Blurred backdrop, clipped to panel's bounds, offset to align
+        // with the live capture behind it (see Drawer.qml header note).
+        // Painted first (bottom-most). See header KNOWN MINOR LIMITATION
+        // re: alignment during the scale transition specifically.
+        MultiEffect {
+            visible: root.backdropSource !== null
+            source: bgCapture
+            x: -panel.x
+            y: -panel.y
+            width: root.width
+            height: root.height
+            blurEnabled: true
+            blur: 0.85     // increased past the spec's literal 16px -- confirmed text behind stayed too legible at 0.5/32
+            blurMax: 64
+            autoPaddingEnabled: false
+        }
+
+        // Tint layer, painted second (on top of blur).
+        Rectangle {
+            anchors.fill: parent
+            color: root.backdropSource
+                ? Qt.rgba(ThemeManager.accentPrimary.r, ThemeManager.accentPrimary.g, ThemeManager.accentPrimary.b, 0.28)
+                : ThemeManager.backgroundSurface
         }
 
         MouseArea { anchors.fill: parent }  // swallow clicks so they don't hit the scrim
@@ -210,3 +278,4 @@ Item {
         }
     }
 }
+

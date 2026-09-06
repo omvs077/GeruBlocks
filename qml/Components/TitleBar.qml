@@ -61,6 +61,32 @@ Item {
         color: ThemeManager.borderDefault
     }
 
+    // Accent strip (backlog item 1b, signed off) — thin accent-colored bar at the top edge,
+    // visible only on the active window (restrained take on Windows 10's accent-title-bar
+    // convention). Height uses ThemeManager.spacing4 rather than an arbitrary thickness, per
+    // the project's "every dimension a literal multiple of 4" rule. Fades via opacity
+    // (durationFast) rather than snapping, and respects ThemeManager.reducedMotion.
+    readonly property bool isActive: root.win ? root.win.active : true
+
+    Rectangle {
+        id: accentStrip
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: ThemeManager.spacing4
+        color: ThemeManager.accentPrimary
+        opacity: root.isActive ? 1.0 : 0.0
+
+        Behavior on opacity {
+            enabled: !ThemeManager.reducedMotion
+            NumberAnimation {
+                duration: ThemeManager.durationFast
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: ThemeManager.easingCurve
+            }
+        }
+    }
+
     function toggleMaximizeRestore() {
         if (!root.win) return
         if (root.win.visibility === Window.Maximized) {
@@ -90,7 +116,7 @@ Item {
         spacing: ThemeManager.spacing8
 
         Icon {
-            name: "grid" // PROPOSAL: placeholder app-mark, see header note 4
+            name: "geru_mark" // Real app-mark — drum motif from the two-figure Warli scene
             size: 16
             color: ThemeManager.accentPrimary
             anchors.verticalCenter: parent.verticalCenter
@@ -222,3 +248,5 @@ Item {
         }
     }
 }
+
+
