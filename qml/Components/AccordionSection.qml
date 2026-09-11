@@ -9,6 +9,13 @@ import GeruBlocks
 // so any component (AppCheckbox, AppText, a whole DataTable) can live
 // inside a section without AccordionSection needing to know about it.
 //
+// MOTION (Phase 2 backlog): expand/collapse duration remapped from
+// durationSlow to durationFast (150ms) — "same bucket as dropdown-open/
+// tab-switch" per the backlog's decided mapping. Reduced-motion gate
+// added (was previously missing — Section 8's rule wasn't consistently
+// wired into every animated component; fixing as encountered, per the
+// backlog's own instruction not to defer this further).
+//
 // Usage (always as a child of Accordion, not standalone):
 //   AccordionSection {
 //       title: "Advanced Settings"
@@ -79,8 +86,9 @@ Column {
         height: root.expanded ? contentColumn.implicitHeight + ThemeManager.spacing16 * 2 : 0
 
         Behavior on height {
+            enabled: !ThemeManager.reducedMotion
             NumberAnimation {
-                duration: ThemeManager.durationSlow
+                duration: ThemeManager.durationFast
                 easing.type: Easing.BezierSpline
                 easing.bezierCurve: ThemeManager.easingCurve
             }

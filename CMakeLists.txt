@@ -127,6 +127,8 @@ qt_add_qml_module(GeruBlocksApp
     qml/Components/LayoutStack.qml
     qml/Components/LayoutGrid.qml
     qml/Components/ScrollArea.qml
+    qml/Components/BackgroundMotif.qml
+    qml/Components/Scrollbar.qml
 
     SOURCES
         src/Core/ThemeManager.h
@@ -165,3 +167,4 @@ qt_add_resources(GeruBlocksApp "textures"
     BASE "${CMAKE_CURRENT_SOURCE_DIR}/assets/textures"
     FILES "${CMAKE_CURRENT_SOURCE_DIR}/assets/textures/glow.png"
 )
+

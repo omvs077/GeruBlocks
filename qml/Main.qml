@@ -40,6 +40,11 @@ Window {
         border.width: window.visibility === Window.Maximized ? 0 : 1
         border.color: ThemeManager.borderDefault
 
+        BackgroundMotif {
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+        }
+
         TitleBar {
             id: titleBar
             width: parent.width
@@ -162,11 +167,10 @@ Window {
     Component {
         id: mainComponent
 
-        Flickable {
+        ScrollArea {
             anchors.fill: parent
             contentWidth: width
             contentHeight: content.height + 40
-            clip: true
 
             Column {
                 id: content
@@ -822,7 +826,7 @@ Window {
                     }
 
                     EmptyState {
-                        iconName: "folder"
+                        useIllustration: true
                         title: "No projects yet"
                         body: "Create your first project to get started."
                         actionText: "New Project"
@@ -854,6 +858,7 @@ Window {
                         anchors.horizontalCenter: parent.horizontalCenter
                         spacing: 16
                         StatTile { label: "Active Projects"; value: "24" }
+                        StatTile { label: "Active Projects"; value: "24"; variant: "featured" }
                         StatTile { label: "Monthly Revenue"; value: "₹45,00,000"; trend: "up"; trendText: "+12% vs last month" }
                     }
 
@@ -982,6 +987,19 @@ Window {
                         }
                     }
 
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "Panel (Featured)" }
+                    Panel {
+                        width: 360
+                        title: "Featured Summary"
+                        variant: "featured"
+                        AppText {
+                            text: "Body content re-colored manually -- Panel's featured variant only themes its own chrome."
+                            color: "#FFFFFF"
+                            wrapMode: Text.WordWrap
+                            width: 300
+                        }
+                    }
+
                     AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "Panel / Group-box" }
                     Panel {
                         width: 360
@@ -1048,3 +1066,4 @@ Window {
         }
     }
 }
+

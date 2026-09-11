@@ -6,6 +6,13 @@ import GeruBlocks
 // Renamed with "App" prefix: collides with QtQuick.Controls' built-in
 // RadioButton type. Circle indicator is intentional and spec-consistent
 // (circle = node in the Warli grammar). Stub for batch confirmation.
+//
+// MOTION (Phase 2 backlog): inner dot previously appeared/disappeared
+// instantly (`visible: root.checked`). Now animates in via scale+opacity
+// at durationMicro (100ms), matching AppCheckbox's check-in treatment —
+// same "quick draw-in" mapping, same reasoning for why scale+fade is the
+// interpretation used (see AppCheckbox.qml's header note). Reduced-
+// motion gated.
 
 Basic.RadioButton {
     id: root
@@ -24,11 +31,29 @@ Basic.RadioButton {
 
         Rectangle {
             anchors.centerIn: parent
-            visible: root.checked
             width: 10
             height: 10
             radius: 5
             color: ThemeManager.accentPrimary
+            opacity: root.checked ? 1 : 0
+            scale: root.checked ? 1 : 0.5
+
+            Behavior on opacity {
+                enabled: !ThemeManager.reducedMotion
+                NumberAnimation {
+                    duration: ThemeManager.durationMicro
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: ThemeManager.easingCurve
+                }
+            }
+            Behavior on scale {
+                enabled: !ThemeManager.reducedMotion
+                NumberAnimation {
+                    duration: ThemeManager.durationMicro
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: ThemeManager.easingCurve
+                }
+            }
         }
     }
 

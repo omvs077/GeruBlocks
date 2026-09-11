@@ -24,6 +24,12 @@ import GeruBlocks
 // fallback as Select.qml's indicator and Accordion's chevron — no
 // confirmed dedicated expand/collapse icon exists yet.
 //
+// MOTION (Phase 2 backlog): children reveal previously had ZERO
+// transition — a hard `visible` cut, not just an unmapped duration.
+// Replaced with the same clipped-height-Behavior pattern
+// AccordionSection already uses, at durationFast (150ms) — "same gap,
+// same fix" per the backlog's own wording. Reduced-motion gated.
+//
 // Node shape: { label, iconName?, children?: [...], expanded? }
 
 Column {
@@ -98,31 +104,47 @@ Column {
         }
     }
 
-    Column {
+    Item {
+        id: childrenClip
         width: root.width
-        visible: root.expanded && root.hasChildren
+        clip: true
+        height: (root.expanded && root.hasChildren) ? childrenColumn.implicitHeight : 0
 
-        Repeater {
-            model: root.hasChildren ? root.node.children : []
+        Behavior on height {
+            enabled: !ThemeManager.reducedMotion
+            NumberAnimation {
+                duration: ThemeManager.durationFast
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: ThemeManager.easingCurve
+            }
+        }
 
-            // Recursion fix: TreeNode cannot instantiate TreeNode by type
-            // name inside its own file -- Qt disallows that at compile
-            // time ("TreeNode is instantiated recursively"), regardless
-            // of runtime guards like `visible`. Loading itself by file
-            // URL through a Loader defers resolution to runtime instead
-            // of compile time, which is the standard way to do
-            // recursive QML trees.
-            Loader {
-                id: childLoader
-                width: root.width
-                property var _pendingNode: modelData
-                property int _pendingDepth: root.depth + 1
-                source: Qt.resolvedUrl("TreeNode.qml")
+        Column {
+            id: childrenColumn
+            width: root.width
 
-                onLoaded: {
-                    item.node = childLoader._pendingNode
-                    item.depth = childLoader._pendingDepth
-                    item.nodeClicked.connect(function(n) { root.nodeClicked(n) })
+            Repeater {
+                model: root.hasChildren ? root.node.children : []
+
+                // Recursion fix: TreeNode cannot instantiate TreeNode by type
+                // name inside its own file -- Qt disallows that at compile
+                // time ("TreeNode is instantiated recursively"), regardless
+                // of runtime guards like `visible`. Loading itself by file
+                // URL through a Loader defers resolution to runtime instead
+                // of compile time, which is the standard way to do
+                // recursive QML trees.
+                Loader {
+                    id: childLoader
+                    width: root.width
+                    property var _pendingNode: modelData
+                    property int _pendingDepth: root.depth + 1
+                    source: Qt.resolvedUrl("TreeNode.qml")
+
+                    onLoaded: {
+                        item.node = childLoader._pendingNode
+                        item.depth = childLoader._pendingDepth
+                        item.nodeClicked.connect(function(n) { root.nodeClicked(n) })
+                    }
                 }
             }
         }

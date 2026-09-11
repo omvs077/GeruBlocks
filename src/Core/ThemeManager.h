@@ -45,6 +45,9 @@ class ThemeManager : public QObject
     // if/when one becomes available on your target platforms, or drive
     // it from an in-app accessibility setting instead.
     Q_PROPERTY(bool reducedMotion READ reducedMotion WRITE setReducedMotion NOTIFY reducedMotionChanged)
+    // Backlog 1f: background personality motifs (corner-fan on app shell + EmptyState).
+    // Defaults to true (personality-first, clean opt-out to flat) per the backlog.
+    Q_PROPERTY(bool backgroundPatternsEnabled READ backgroundPatternsEnabled WRITE setBackgroundPatternsEnabled NOTIFY backgroundPatternsEnabledChanged)
 
     // --- Color tokens (Section 3.1) ---
     Q_PROPERTY(QColor backgroundPage READ backgroundPage NOTIFY themeChanged)
@@ -142,6 +145,9 @@ public:
     bool reducedMotion() const { return m_reducedMotion; }
     void setReducedMotion(bool value);
 
+    bool backgroundPatternsEnabled() const { return m_backgroundPatternsEnabled; }
+    void setBackgroundPatternsEnabled(bool value);
+
     QColor backgroundPage() const;
     QColor backgroundSurface() const;
     QColor backgroundPanel() const;
@@ -205,9 +211,11 @@ signals:
     void themeChanged();
     void densityChanged();
     void reducedMotionChanged();
+    void backgroundPatternsEnabledChanged();
 
 private:
     ThemeMode m_mode = ThemeMode::Light;
     DensityMode m_density = DensityMode::Comfortable;
     bool m_reducedMotion = false;
+    bool m_backgroundPatternsEnabled = true;
 };

@@ -20,6 +20,15 @@ import GeruBlocks
 // hasn't had its real design pass yet anyway. For now, invalid state
 // only shows as a red indicator border. Ask if you want the full
 // error-text treatment now instead of deferring it.
+//
+// MOTION (Phase 2 backlog): checkmark previously appeared/disappeared
+// instantly (`visible: root.checked`). Now animates in via scale+opacity
+// at durationMicro (100ms) — "quick draw-in ... same bucket as button
+// hover/press" per the backlog's decided mapping. Not a literal SVG
+// stroke draw (the checkmark is a text glyph, not a path this project
+// controls), so scale+fade is the closest honest interpretation of
+// "draw-in" achievable here — flagging the substitution rather than
+// silently calling it a literal draw animation. Reduced-motion gated.
 
 Basic.CheckBox {
     id: root
@@ -47,11 +56,29 @@ Basic.CheckBox {
         color: root.checked ? ThemeManager.accentPrimary : "transparent"
 
         Text {
-            visible: root.checked
             anchors.centerIn: parent
             text: "\u2713"
             color: "#FFFFFF"
             font.pixelSize: 12
+            opacity: root.checked ? 1 : 0
+            scale: root.checked ? 1 : 0.5
+
+            Behavior on opacity {
+                enabled: !ThemeManager.reducedMotion
+                NumberAnimation {
+                    duration: ThemeManager.durationMicro
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: ThemeManager.easingCurve
+                }
+            }
+            Behavior on scale {
+                enabled: !ThemeManager.reducedMotion
+                NumberAnimation {
+                    duration: ThemeManager.durationMicro
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: ThemeManager.easingCurve
+                }
+            }
         }
     }
 

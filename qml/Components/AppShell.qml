@@ -25,6 +25,13 @@ import GeruBlocks
 // checkmark/close were verified earlier in this project). Check these
 // exist before relying on this compiling clean — swap for confirmed
 // names if not.
+//
+// BACKGROUND MOTIF (backlog 1f): placed inside contentArea specifically,
+// anchored to ITS bottom-right corner, not the shell root — navRail is
+// an opaque solid-fill panel that would just hide the motif entirely if
+// it sat behind the whole shell. This is the real intended home for the
+// motif (Main.qml's copy is the flat test harness; this is the actual
+// app shell it's meant to live in).
 
 Item {
     id: root
@@ -74,6 +81,11 @@ Item {
             id: contentArea
             width: parent.width - navRail.width
             height: parent.height
+
+            BackgroundMotif {
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+            }
 
             AppText {
                 anchors.centerIn: parent

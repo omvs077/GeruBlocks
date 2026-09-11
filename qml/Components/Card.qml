@@ -58,7 +58,7 @@ Basic.Button {
     property Component footer: null
 
     hoverEnabled: true
-    padding: ThemeManager.spacing16
+    padding: ThemeManager.spacing24  // bumped from spacing16, backlog 1d -- cards read slightly tight
     implicitWidth: 280
     implicitHeight: contentColumn.implicitHeight + padding * 2
 
@@ -182,3 +182,4 @@ Basic.Button {
         }
     }
 }
+

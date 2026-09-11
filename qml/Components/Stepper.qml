@@ -18,6 +18,12 @@ import GeruBlocks
 // (not centered) so the connector-line math stays simple — a visual
 // choice, flagged as a first-pass proposal rather than a locked layout.
 //
+// MOTION (Phase 2 backlog): step transitions previously had ZERO
+// animation — colors snapped instantly when currentIndex changed.
+// Added Behavior on color for the node fill/border and the connector,
+// at durationSlow (250ms) — "same bucket as panel enter/exit" per the
+// backlog's decided mapping. Reduced-motion gated.
+//
 // Usage:
 //   Stepper {
 //       width: 400
@@ -58,6 +64,15 @@ Item {
                     width: stepItem.width - circle.width
                     height: 2
                     color: stepItem.isDone ? ThemeManager.accentPrimary : ThemeManager.borderDefault
+
+                    Behavior on color {
+                        enabled: !ThemeManager.reducedMotion
+                        ColorAnimation {
+                            duration: ThemeManager.durationSlow
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: ThemeManager.easingCurve
+                        }
+                    }
                 }
 
                 Rectangle {
@@ -69,6 +84,23 @@ Item {
                     color: stepItem.isDone ? ThemeManager.accentPrimary : ThemeManager.backgroundSurface
                     border.width: 2
                     border.color: stepItem.nodeBorderColor
+
+                    Behavior on color {
+                        enabled: !ThemeManager.reducedMotion
+                        ColorAnimation {
+                            duration: ThemeManager.durationSlow
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: ThemeManager.easingCurve
+                        }
+                    }
+                    Behavior on border.color {
+                        enabled: !ThemeManager.reducedMotion
+                        ColorAnimation {
+                            duration: ThemeManager.durationSlow
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: ThemeManager.easingCurve
+                        }
+                    }
 
                     Text {
                         visible: stepItem.isDone

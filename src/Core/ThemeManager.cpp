@@ -27,6 +27,14 @@ void ThemeManager::setReducedMotion(bool value)
     emit reducedMotionChanged();
 }
 
+void ThemeManager::setBackgroundPatternsEnabled(bool value)
+{
+    if (value == m_backgroundPatternsEnabled)
+        return;
+    m_backgroundPatternsEnabled = value;
+    emit backgroundPatternsEnabledChanged();
+}
+
 void ThemeManager::setMode(ThemeMode mode)
 {
     if (m_mode == mode)
