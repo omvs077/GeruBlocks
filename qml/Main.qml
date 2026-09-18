@@ -28,6 +28,7 @@ Window {
 
     property bool showIconGallery: false
     property bool showAppShell: false
+    property int demoCountUpValue: 24
 
     // ---------- Chrome: title bar + content workspace ----------
     Rectangle {
@@ -839,6 +840,30 @@ Window {
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 20
                     AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "Step 11 — Data Display" }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "StatTile -- count-up + tile-flip test" }
+                    Row {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 16
+
+                        StatTile {
+                            label: "Count-Up Test"
+                            value: window.demoCountUpValue.toString()
+                        }
+
+                        StatTile {
+                            label: "Hover Me"
+                            value: "42"
+                            backContent: Component {
+                                AppText { text: "Flipped!"; anchors.centerIn: parent; color: ThemeManager.textPrimary }
+                            }
+                        }
+
+                        Button {
+                            text: "Bump Count-Up Value"
+                            onClicked: window.demoCountUpValue = (window.demoCountUpValue === 24 ? 87 : 24)
+                        }
+                    }
 
                     Row {
                         anchors.horizontalCenter: parent.horizontalCenter
