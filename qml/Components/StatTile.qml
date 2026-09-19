@@ -16,41 +16,29 @@ import GeruBlocks
 //
 // COUNT-UP (Phase 2 backlog): when `value` changes AND is a plain
 // integer string (e.g. "24"), the displayed number animates toward the
-// new value over durationSlow (250ms) rather than swapping instantly.
-// SCOPE, FLAGGED: currency/formatted strings (e.g. "₹45,00,000") are
-// NOT animated — parsing/reformatting Indian-grouped currency text
-// mid-animation is fragile, so those instant-swap exactly as before.
-// Only plain-integer values get the count-up treatment. Side effect,
-// treated as a feature not a bug: since a Behavior animates from a
-// property's default (0), a tile mounting for the first time with a
-// numeric value will count up from 0 on load — a reasonable "reveal"
-// moment for a KPI tile, not something suppressed here.
+// new value over durationSlow (250ms). Currency/formatted strings
+// instant-swap (parsing/reformatting mid-animation judged too fragile).
 //
-// TILE-FLIP (Phase 2 backlog — 4th hover behavior, Governance Principle
-// 3 formally amended per the backlog to cover 4 behaviors now; the
-// spec .docx itself is NOT yet updated with this amendment — tracked as
-// existing spec-doc debt, not new debt from this change).
-// Opt-in via `backContent` (a Component, same slot pattern as Card's
-// `footer`) — front face flips away to reveal back content on hover,
-// reverses on hover-out. Tiles that don't set backContent behave
-// exactly as before; this does NOT replace or interact with 3D-tilt
-// (that behavior belongs to other large tiles, not StatTile).
+// TILE-FLIP (Phase 2 backlog — 4th hover behavior): opt-in via
+// `backContent`. See file history / commit log for full technical notes
+// on the Scale-transform approach and duration split.
 //
-// TECHNICAL NOTE: QtQuick's plain `scale` property is UNIFORM (both
-// axes together) — Button.qml's press-scale uses it correctly for that
-// reason. An X-axis-only "squish" needs a dedicated `Scale` transform
-// object instead (see `transform: Scale { ... }` below) — a different
-// mechanism, deliberately, not an inconsistency with the rest of the
-// codebase's `scale:` usage elsewhere.
+// DISPLAY TYPE STEP (Phase 3 typography backlog, lever 1, signed off):
+// the hero value now uses Heading's new "display" variant at
+// weight: "black" (40px Poppins Black) instead of the old default
+// "header" size (24px SemiBold) — the backlog's explicit sign-off was
+// "StatTile's hero KPI numbers use Poppins Black, not Plex Sans Bold."
 //
-// DURATION READING, FLAGGED: the backlog states "Duration: duration.panel
-// (320ms)" for the whole flip without specifying how it splits across
-// the two squish phases. Read here as 320ms TOTAL, split evenly (160ms
-// each direction) — a reasonable interpretation, not an explicit spec
-// value, confirm if a different split was intended.
-//
-// REDUCED MOTION: flip becomes an instant content swap, no transform at
-// all, per Section 8's explicit "instant... no transforms" allowance.
+// OVERFLOW HANDLING, FLAGGED AS MY OWN ADDITION NOT SPEC-STATED: jumping
+// from 24px to 40px Black makes long currency strings (e.g.
+// "₹45,00,000") a real risk of overflowing StatTile's fixed 220px
+// implicitWidth — the backlog's sign-off only discusses the treatment
+// itself, not this width consequence. Added fontSizeMode: Text.HorizontalFit
+// with minimumPixelSize: 20 so long values shrink to fit rather than
+// clip or overflow, rather than leaving this unhandled. Confirm on-screen
+// that a long currency value still reads acceptably at its shrunk size —
+// this is a reasonable engineering response to a real constraint, not
+// something explicitly reviewed/signed off.
 //
 // Usage:
 //   StatTile { label: "Active Projects"; value: "24" }
@@ -148,6 +136,11 @@ Rectangle {
             color: root.isFeatured ? Qt.rgba(1, 1, 1, 0.85) : ThemeManager.textSecondary
         }
         Heading {
+            width: contentColumn.width
+            variant: "display"
+            weight: "black"
+            fontSizeMode: Text.HorizontalFit
+            minimumPixelSize: 20
             text: root._isPlainNumeric ? Math.round(root._animatedNumber).toString() : root.value
             color: root.isFeatured ? "#FFFFFF" : ThemeManager.textPrimary
         }

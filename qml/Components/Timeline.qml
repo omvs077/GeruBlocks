@@ -10,6 +10,12 @@ import GeruBlocks
 // over spacing between entries, the same reasoning as Stepper.qml's
 // header/content split.
 //
+// TYPEFACE (Phase 3 typography backlog, lever 3): the `time` field
+// switches to IBM Plex Sans — the clearest literal match for the
+// backlog's "timestamps/metadata" wording. `title`/`body` stay Poppins,
+// read here as main content rather than metadata. Interpretation
+// flagged, not an explicit line-by-line spec call.
+//
 // Usage:
 //   Timeline {
 //       items: [
@@ -62,7 +68,12 @@ Column {
                 width: parent.width - node.width - ThemeManager.spacing12
                 spacing: 2
 
-                AppText { text: modelData.time; variant: "caption"; color: ThemeManager.textSecondary }
+                AppText {
+                    text: modelData.time
+                    variant: "caption"
+                    color: ThemeManager.textSecondary
+                    font.family: "IBM Plex Sans"
+                }
                 AppText { text: modelData.title; color: ThemeManager.textPrimary }
                 AppText {
                     id: bodyText

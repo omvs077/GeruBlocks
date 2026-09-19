@@ -26,9 +26,62 @@ qt_add_executable(GeruBlocksApp
 qt_add_resources(GeruBlocksApp "fonts"
     PREFIX "/fonts"
     FILES
+        # Poppins -- primary voice, Latin+Devanagari merged per family
         assets/fonts/Poppins-Regular.ttf
         assets/fonts/Poppins-Medium.ttf
         assets/fonts/Poppins-SemiBold.ttf
+        assets/fonts/Poppins-Light.ttf
+        assets/fonts/Poppins-Black.ttf
+
+        # IBM Plex Sans -- dense/numeric data (Phase 3 backlog)
+        assets/fonts/IBMPlexSans-Thin.ttf
+        assets/fonts/IBMPlexSans-ExtraLight.ttf
+        assets/fonts/IBMPlexSans-Light.ttf
+        assets/fonts/IBMPlexSans-Regular.ttf
+        assets/fonts/IBMPlexSans-Medium.ttf
+        assets/fonts/IBMPlexSans-SemiBold.ttf
+        assets/fonts/IBMPlexSans-Bold.ttf
+
+        # IBM Plex Sans Devanagari -- dense/numeric data, Devanagari companion
+        assets/fonts/IBMPlexSansDevanagari-Thin.ttf
+        assets/fonts/IBMPlexSansDevanagari-ExtraLight.ttf
+        assets/fonts/IBMPlexSansDevanagari-Light.ttf
+        assets/fonts/IBMPlexSansDevanagari-Regular.ttf
+        assets/fonts/IBMPlexSansDevanagari-Medium.ttf
+        assets/fonts/IBMPlexSansDevanagari-SemiBold.ttf
+        assets/fonts/IBMPlexSansDevanagari-Bold.ttf
+
+        # IBM Plex Mono -- Keycap chips, technical/version accents
+        assets/fonts/IBMPlexMono-Thin.ttf
+        assets/fonts/IBMPlexMono-ExtraLight.ttf
+        assets/fonts/IBMPlexMono-Light.ttf
+        assets/fonts/IBMPlexMono-Regular.ttf
+        assets/fonts/IBMPlexMono-Medium.ttf
+        assets/fonts/IBMPlexMono-SemiBold.ttf
+        assets/fonts/IBMPlexMono-Bold.ttf
+
+        # Martel -- serif contrast, print/export + formal on-screen UI (covers Latin+Devanagari in one family)
+        assets/fonts/Martel-ExtraLight.ttf
+        assets/fonts/Martel-Light.ttf
+        assets/fonts/Martel-Regular.ttf
+        assets/fonts/Martel-SemiBold.ttf
+        assets/fonts/Martel-Bold.ttf
+        assets/fonts/Martel-ExtraBold.ttf
+        assets/fonts/Martel-Black.ttf
+
+        # Kalam + Dancing Script -- marketing/branding script fonts, NOT part of
+        # the Phase 3 backlog's 5 UI-typography levers. Embedded but currently
+        # have no consumer anywhere in the QML component library -- no website
+        # or marketing surface exists yet to use them on (per the locked build
+        # sequence). Flagging so this isn't mistaken for dead/unused weight if
+        # revisited later: intentional, just ahead of the surface that needs it.
+        assets/fonts/Kalam-Light.ttf
+        assets/fonts/Kalam-Regular.ttf
+        assets/fonts/Kalam-Bold.ttf
+        assets/fonts/DancingScript-Regular.ttf
+        assets/fonts/DancingScript-Medium.ttf
+        assets/fonts/DancingScript-SemiBold.ttf
+        assets/fonts/DancingScript-Bold.ttf
 )
 
 # ToastManager and CommandRegistry use `pragma Singleton` in the QML file itself,

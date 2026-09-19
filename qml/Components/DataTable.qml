@@ -13,15 +13,21 @@ import GeruBlocks
 // ThemeManager.rowHeight/densityPadding and LocalizationUtil's Indian
 // number/currency formatting, both already built and signed off.
 //
+// TYPEFACE (Phase 3 typography backlog, lever 3): numeric cells now use
+// IBM Plex Sans instead of Poppins — the backlog's literal scope is
+// "DataTable numeric columns" specifically, not the whole table, so text
+// columns (Zone, Project name, etc.) stay on Poppins. Headers are
+// untouched too — they're column labels, not data values, outside the
+// backlog's stated scope. No Devanagari companion wired here: numeric
+// cells render plain digits, which don't need Devanagari letterforms.
+//
 // TABULAR NUMS: spec Section 3.2 explicitly scopes font-variant-numeric:
 // tabular-nums to "table and metric-text components" — this is the first
-// component that scope actually applies to (AppText deliberately did NOT
-// apply it, staying general-purpose). Implemented via font.features:
-// {"tnum": 1}. FLAGGED, NOT VERIFIED: I haven't confirmed Poppins actually
-// has a tabular-figures OpenType feature table — if it doesn't, this is a
-// harmless no-op (unsupported feature tags are just ignored), not a bug,
-// but the visual alignment benefit is unconfirmed either way. Worth an
-// actual look once built: do numeric columns actually line up?
+// component that scope actually applies to. Implemented via font.features:
+// {"tnum": 1}. FLAGGED, NOT VERIFIED: I haven't confirmed either Poppins
+// or IBM Plex Sans actually has a tabular-figures OpenType feature table
+// — if not, this is a harmless no-op, not a bug, but unconfirmed either
+// way. Worth an actual look once built: do numeric columns line up?
 //
 // ASSUMPTIONS FLAGGED, NOT LOCKED (spec doesn't specify these details):
 // - Numeric columns right-align, text columns left-align (common
@@ -175,7 +181,7 @@ Item {
                                 anchors.leftMargin: ThemeManager.densityPadding
                                 anchors.rightMargin: ThemeManager.densityPadding
                                 horizontalAlignment: modelData.numeric ? Text.AlignRight : Text.AlignLeft
-                                font.family: "Poppins"
+                                font.family: modelData.numeric ? "IBM Plex Sans" : "Poppins"
                                 font.pixelSize: 14
                                 font.features: modelData.numeric ? { "tnum": 1 } : ({})
                                 color: ThemeManager.textPrimary

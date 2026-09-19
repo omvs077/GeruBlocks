@@ -16,6 +16,21 @@ import GeruBlocks
 // this is an interim scope decision, not a finished implementation of
 // the spec's glass recipe.
 //
+// TYPEFACE CONVENTION, Phase 3 typography backlog lever 5 (Martel):
+// the backlog's Martel use case is "Dialog terms-and-conditions text,
+// legal/formal copy wherever it appears on-screen" — NOT a change to
+// this file's own code. Dialog's body is a fully open default-property
+// slot (bodyColumn below), the same "chrome I own vs. content I don't"
+// situation as Panel's featured variant — Dialog has no way to know
+// whether a caller's content is legal copy or a plain "Are you sure?"
+// confirmation, so forcing Martel here would wrongly restyle every
+// dialog's body text, not just the ones that should get it.
+// CONVENTION: when a Dialog's body genuinely IS legal/formal copy
+// (terms of service, license text, a formal notice), the CALLER sets
+// font.family: "Martel" directly on that content — see Main.qml's
+// terms-and-conditions demo for the applied pattern. Ordinary dialogs
+// (confirmations, simple prompts) stay on Poppins, unchanged.
+//
 // Entrance/exit uses duration.panel (320ms, "Panel scale+fade settle")
 // exactly as the spec's own duration table names it — scale 0.95→1.0 +
 // fade, not a guessed animation.

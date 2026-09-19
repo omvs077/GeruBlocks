@@ -8,6 +8,12 @@ import GeruBlocks
 // etc). Border-reveal hover, matching NavItem.qml/TreeNode.qml exactly
 // (spec 3.6 groups "list rows, nav items" under one hover behavior).
 //
+// TYPEFACE (Phase 3 typography backlog, lever 3): subtitle switches to
+// IBM Plex Sans — this is the literal target of the backlog's "List
+// secondary text" line (List.qml itself is just a wrapper/divider
+// container with no text of its own). Title stays Poppins, same
+// metadata-vs-main-content split as Timeline's timestamp / KeyValue's key.
+//
 // SLOT PATTERN: leading/trailing use `.data`-aliased containers, a
 // standard QML technique for accepting arbitrary declared content into
 // a named property — distinct from Form/Accordion's single default-
@@ -92,7 +98,13 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             spacing: 2
             AppText { text: root.title; color: ThemeManager.textPrimary }
-            AppText { text: root.subtitle; variant: "caption"; color: ThemeManager.textSecondary; visible: root.subtitle !== "" }
+            AppText {
+                text: root.subtitle
+                variant: "caption"
+                color: ThemeManager.textSecondary
+                visible: root.subtitle !== ""
+                font.family: "IBM Plex Sans"
+            }
         }
     }
 

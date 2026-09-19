@@ -67,6 +67,14 @@ Window {
             }
 
             Basic.Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: 50
+                z: 10
+                text: "Open Terms Dialog (Martel demo)"
+                onClicked: termsDialog.open()
+            }
+
+            Basic.Button {
                 anchors.top: parent.top
                 anchors.right: parent.right
                 anchors.margins: 8
@@ -120,6 +128,32 @@ Window {
     }
 
     ToastHost {}
+
+    Dialog {
+        id: termsDialog
+        title: "Terms & Conditions"
+        panelWidth: 480
+        Column {
+            width: parent.width
+            spacing: 8
+            Text {
+                width: parent.width
+                wrapMode: Text.WordWrap
+                font.family: "Martel"
+                font.pixelSize: 14
+                color: ThemeManager.textSecondary
+                text: "By using Geru Blocks, you agree to the terms outlined here. This sample paragraph demonstrates Martel set as formal/legal on-screen copy, per the typography backlog's lever 5 convention -- ordinary dialog body text elsewhere in this app stays on Poppins."
+            }
+        }
+        footer: Component {
+            Row {
+                spacing: 8
+                anchors.right: parent.right
+                Button { text: "Decline"; variant: "ghost"; onClicked: termsDialog.close() }
+                Button { text: "Accept"; variant: "primary"; onClicked: termsDialog.close() }
+            }
+        }
+    }
 
     CommandPalette { backdropSource: chromeRoot }
 
@@ -284,6 +318,7 @@ Window {
                     spacing: 6
                     AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "Typography (Heading / AppText / Link)" }
                     Heading { anchors.horizontalCenter: parent.horizontalCenter; text: "Page Title" }
+                    Heading { anchors.horizontalCenter: parent.horizontalCenter; text: "Hero Headline (Display / Light)"; variant: "display" }
                     Heading { anchors.horizontalCenter: parent.horizontalCenter; text: "Section Title"; variant: "subheader" }
                     AppText { anchors.horizontalCenter: parent.horizontalCenter; text: "Card title text"; variant: "title" }
                     AppText { anchors.horizontalCenter: parent.horizontalCenter; text: "Secondary heading"; variant: "subtitle" }

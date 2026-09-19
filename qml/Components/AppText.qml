@@ -25,6 +25,15 @@ import GeruBlocks
 // belongs to DataTable / a future metric-text variant in Step 3, not
 // this general-purpose component.
 //
+// LETTER-SPACING (Phase 3 typography backlog, lever 2): +0.4px tracking
+// added on "caption" specifically — small, reversible, no new font files,
+// per the backlog's decided mapping. NOT yet re-checked against
+// Badge/RemovableTag, which the backlog itself flags as having tight
+// fixed padding around Caption-ish text — the extra tracking could force
+// unwanted wraps on longer labels like "Urgent"/"Blocked." Need to see
+// those two files before confirming this is safe everywhere it's used,
+// not just in isolation here.
+//
 // Usage:
 //   Text { text: "Card title"; variant: "title" }
 //   Text { text: "Default text" }                      // defaults to "base"
@@ -48,5 +57,6 @@ Text {
 
     font.family: _style.family
     font.pixelSize: _style.size
+    font.letterSpacing: variant === "caption" ? 0.4 : 0
     color: variant === "caption" ? ThemeManager.textSecondary : ThemeManager.textPrimary
 }

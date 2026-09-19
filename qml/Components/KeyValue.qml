@@ -9,6 +9,12 @@ import GeruBlocks
 // reasoning as Timeline — this is display-only data, not a place for
 // arbitrary child content the way Form/Accordion need.
 //
+// TYPEFACE (Phase 3 typography backlog, lever 3): the `key` label
+// switches to IBM Plex Sans, mirroring Timeline's timestamp treatment —
+// both are metadata-style labels rather than main content. `value`
+// stays Poppins. Interpretation flagged, not an explicit line-by-line
+// spec call.
+//
 // Usage:
 //   KeyValue {
 //       items: [
@@ -35,6 +41,7 @@ Column {
                 width: root.keyWidth
                 text: modelData.key
                 color: ThemeManager.textSecondary
+                font.family: "IBM Plex Sans"
             }
             AppText {
                 width: parent.width - root.keyWidth - parent.spacing
