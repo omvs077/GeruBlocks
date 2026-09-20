@@ -319,6 +319,47 @@ Window {
                     AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "subtitle"; text: "Typography (Heading / AppText / Link)" }
                     Heading { anchors.horizontalCenter: parent.horizontalCenter; text: "Page Title" }
                     Heading { anchors.horizontalCenter: parent.horizontalCenter; text: "Hero Headline (Display / Light)"; variant: "display" }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "Multi-script -- Bangla shaping check (Anek Bangla)" }
+                    Heading {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "স্বাগতম"
+                        variant: "header"
+                        scriptCode: "bn"
+                    }
+                    AppText {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "গেরু ব্লক্স"
+                        variant: "title"
+                        scriptCode: "bn"
+                    }
+                    AppText {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "গেরু ব্লক্স -- ডিজাইন সিস্টেম"
+                        variant: "body"
+                        scriptCode: "bn"
+                    }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "Telugu (Anek Telugu) -- conjunct test: స్వ" }
+                    Heading { anchors.horizontalCenter: parent.horizontalCenter; text: "స్వాగతం"; variant: "header"; scriptCode: "te" }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "Tamil (Anek Tamil) -- vowel-sign positioning test, not conjunct-stacking (Tamil orthography rarely stacks conjuncts)" }
+                    Heading { anchors.horizontalCenter: parent.horizontalCenter; text: "வணக்கம்"; variant: "header"; scriptCode: "ta" }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "Gujarati (Anek Gujarati) -- conjunct test: સ્વ" }
+                    Heading { anchors.horizontalCenter: parent.horizontalCenter; text: "સ્વાગત"; variant: "header"; scriptCode: "gu" }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "Kannada (Anek Kannada) -- conjunct test: ಸ್ವ" }
+                    Heading { anchors.horizontalCenter: parent.horizontalCenter; text: "ಸ್ವಾಗತ"; variant: "header"; scriptCode: "kn" }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "Odia (Anek Odia) -- conjunct test: ସ୍ୱ" }
+                    Heading { anchors.horizontalCenter: parent.horizontalCenter; text: "ସ୍ୱାଗତ"; variant: "header"; scriptCode: "or" }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "Malayalam (Anek Malayalam) -- conjunct test: സ്വ" }
+                    Heading { anchors.horizontalCenter: parent.horizontalCenter; text: "സ്വാഗതം"; variant: "header"; scriptCode: "ml" }
+
+                    AppText { anchors.horizontalCenter: parent.horizontalCenter; variant: "caption"; text: "Gurmukhi (Anek Gurmukhi) -- real-phrase test, not conjunct-stacking (Gurmukhi orthography rarely stacks conjuncts)" }
+                    Heading { anchors.horizontalCenter: parent.horizontalCenter; text: "ਸਵਾਗਤ ਹੈ"; variant: "header"; scriptCode: "pa" }
                     Heading { anchors.horizontalCenter: parent.horizontalCenter; text: "Section Title"; variant: "subheader" }
                     AppText { anchors.horizontalCenter: parent.horizontalCenter; text: "Card title text"; variant: "title" }
                     AppText { anchors.horizontalCenter: parent.horizontalCenter; text: "Secondary heading"; variant: "subtitle" }
