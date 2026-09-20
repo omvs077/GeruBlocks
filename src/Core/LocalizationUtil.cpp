@@ -3,6 +3,7 @@
 #include <QQmlEngine>
 #include <QStringList>
 #include <cmath>
+#include <QMap>
 
 LocalizationUtil::LocalizationUtil(QObject *parent)
     : QObject(parent)
@@ -104,4 +105,31 @@ QString LocalizationUtil::formatTime(const QTime &time) const
 QString LocalizationUtil::formatDateTime(const QDateTime &dateTime) const
 {
     return formatDate(dateTime.date()) + " " + formatTime(dateTime.time());
+}
+
+QString LocalizationUtil::fontFamilyForScript(const QString &scriptCode, const QString &weightVariant) const
+{
+    // Family-name strings verified directly against each .ttf's actual
+    // name table before use here (not guessed from filenames) -- no
+    // surprises found this time, unlike Martel's renamed weights.
+    static const QMap<QString, QString> scriptFamilies = {
+        {QStringLiteral("bn"), QStringLiteral("Anek Bangla")},
+        {QStringLiteral("te"), QStringLiteral("Anek Telugu")},
+        {QStringLiteral("ta"), QStringLiteral("Anek Tamil")},
+        {QStringLiteral("gu"), QStringLiteral("Anek Gujarati")},
+        {QStringLiteral("kn"), QStringLiteral("Anek Kannada")},
+        {QStringLiteral("or"), QStringLiteral("Anek Odia")},
+        {QStringLiteral("ml"), QStringLiteral("Anek Malayalam")},
+        {QStringLiteral("pa"), QStringLiteral("Anek Gurmukhi")}
+    };
+
+    const QString base = scriptFamilies.value(scriptCode);
+    if (base.isEmpty())
+        return QString(); // unrecognized script -- caller falls back to Poppins
+
+    if (weightVariant == QStringLiteral("medium"))
+        return base + QStringLiteral(" Medium");
+    if (weightVariant == QStringLiteral("semibold"))
+        return base + QStringLiteral(" SemiBold");
+    return base; // "regular" (default) or anything unrecognized
 }

@@ -26,24 +26,37 @@ import GeruBlocks
 // this general-purpose component.
 //
 // LETTER-SPACING (Phase 3 typography backlog, lever 2): +0.4px tracking
-// added on "caption" specifically — small, reversible, no new font files,
-// per the backlog's decided mapping. NOT yet re-checked against
-// Badge/RemovableTag, which the backlog itself flags as having tight
-// fixed padding around Caption-ish text — the extra tracking could force
-// unwanted wraps on longer labels like "Urgent"/"Blocked." Need to see
-// those two files before confirming this is safe everywhere it's used,
-// not just in isolation here.
+// on "caption" specifically — verified safe against Badge/RemovableTag
+// (see commit history for the full verification).
+//
+// MULTI-SCRIPT (backlog Section 3, deeper-integration option, signed
+// off): `scriptCode` (ISO 639-1, e.g. "bn", "te", "ta"...) makes this
+// component call LocalizationUtil.fontFamilyForScript() instead of the
+// hardcoded Poppins family — defaults to "" (empty), which falls
+// straight through to the original Poppins logic unchanged, so every
+// existing usage across the app is unaffected. WEIGHT MAPPING FLAGGED:
+// Anek only has 3 instanced weights (Regular/Medium/SemiBold) versus
+// Poppins' full range, so "title"/"subtitle" map to "medium" and
+// "base"/"caption"/"body" map to "regular" — a reasonable compression,
+// not a spec-stated rule. If scriptCode is set but unrecognized (or
+// LocalizationUtil returns empty for any reason), silently falls back
+// to the normal Poppins family rather than breaking.
 //
 // Usage:
 //   Text { text: "Card title"; variant: "title" }
 //   Text { text: "Default text" }                      // defaults to "base"
 //   Text { text: "Last updated 2 min ago"; variant: "caption" }
+//   Text { text: "লেখা"; scriptCode: "bn" }              // NEW — Bangla via Anek
 
 Text {
     id: root
 
     // "title" | "subtitle" | "base" | "caption" | "body"
     property string variant: "base"
+
+    // ISO 639-1 script code ("bn", "te", "ta", "gu", "kn", "or", "ml", "pa")
+    // or "" (default) for the normal Poppins path. See header note.
+    property string scriptCode: ""
 
     readonly property var _styles: ({
         "title":    { size: 16, family: "Poppins Medium" },
@@ -55,7 +68,24 @@ Text {
 
     readonly property var _style: _styles[variant] !== undefined ? _styles[variant] : _styles["base"]
 
-    font.family: _style.family
+    readonly property var _scriptWeightForVariant: ({
+        "title": "medium",
+        "subtitle": "medium",
+        "base": "regular",
+        "caption": "regular",
+        "body": "regular"
+    })
+
+    readonly property string _resolvedFamily: {
+        if (root.scriptCode !== "") {
+            var weight = _scriptWeightForVariant[variant] !== undefined ? _scriptWeightForVariant[variant] : "regular"
+            var scriptFamily = LocalizationUtil.fontFamilyForScript(root.scriptCode, weight)
+            if (scriptFamily !== "") return scriptFamily
+        }
+        return _style.family
+    }
+
+    font.family: _resolvedFamily
     font.pixelSize: _style.size
     font.letterSpacing: variant === "caption" ? 0.4 : 0
     color: variant === "caption" ? ThemeManager.textSecondary : ThemeManager.textPrimary

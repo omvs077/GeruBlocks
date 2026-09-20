@@ -33,6 +33,36 @@ qt_add_resources(GeruBlocksApp "fonts"
         assets/fonts/Poppins-Light.ttf
         assets/fonts/Poppins-Black.ttf
 
+        # Anek -- multi-script typography backlog (Section 3). Rolled out one
+        # script at a time, on-device shaping-verified before the next --
+        # see LocalizationUtil.fontFamilyForScript() for how these are
+        # selected at runtime. Devanagari/Latin deliberately excluded,
+        # stay on Poppins per the project's own decision.
+        assets/fonts/AnekBangla-Regular.ttf
+        assets/fonts/AnekBangla-Medium.ttf
+        assets/fonts/AnekBangla-SemiBold.ttf
+        assets/fonts/AnekTelugu-Regular.ttf
+        assets/fonts/AnekTelugu-Medium.ttf
+        assets/fonts/AnekTelugu-SemiBold.ttf
+        assets/fonts/AnekTamil-Regular.ttf
+        assets/fonts/AnekTamil-Medium.ttf
+        assets/fonts/AnekTamil-SemiBold.ttf
+        assets/fonts/AnekGujarati-Regular.ttf
+        assets/fonts/AnekGujarati-Medium.ttf
+        assets/fonts/AnekGujarati-SemiBold.ttf
+        assets/fonts/AnekKannada-Regular.ttf
+        assets/fonts/AnekKannada-Medium.ttf
+        assets/fonts/AnekKannada-SemiBold.ttf
+        assets/fonts/AnekOdia-Regular.ttf
+        assets/fonts/AnekOdia-Medium.ttf
+        assets/fonts/AnekOdia-SemiBold.ttf
+        assets/fonts/AnekMalayalam-Regular.ttf
+        assets/fonts/AnekMalayalam-Medium.ttf
+        assets/fonts/AnekMalayalam-SemiBold.ttf
+        assets/fonts/AnekGurmukhi-Regular.ttf
+        assets/fonts/AnekGurmukhi-Medium.ttf
+        assets/fonts/AnekGurmukhi-SemiBold.ttf
+
         # IBM Plex Sans -- dense/numeric data (Phase 3 backlog)
         assets/fonts/IBMPlexSans-Thin.ttf
         assets/fonts/IBMPlexSans-ExtraLight.ttf

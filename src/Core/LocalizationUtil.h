@@ -66,6 +66,22 @@ public:
 
     Q_INVOKABLE void toggleTimeFormat();
 
+    // Multi-script typography backlog (Section 3): returns the correct
+    // embedded font-family string for the given script, since a single
+    // hardcoded "Anek <Script>" string per callsite would repeat this
+    // mapping everywhere it's needed. scriptCode uses ISO 639-1 language
+    // codes: "bn" Bangla, "te" Telugu, "ta" Tamil, "gu" Gujarati,
+    // "kn" Kannada, "or" Odia, "ml" Malayalam, "pa" Gurmukhi (Punjabi).
+    // weightVariant: "regular" (default) | "medium" | "semibold" --
+    // matching Poppins' own established weight-string convention (no
+    // suffix for Regular, then " Medium" / " SemiBold"). Returns an
+    // empty string for an unrecognized scriptCode -- callers should
+    // treat that as "fall back to Poppins" rather than crash on a bad
+    // family string. Devanagari and Latin are deliberately NOT covered
+    // here -- per the project's own decision, those stay on Poppins,
+    // never re-engineered onto Anek.
+    Q_INVOKABLE QString fontFamilyForScript(const QString &scriptCode, const QString &weightVariant = QStringLiteral("regular")) const;
+
 signals:
     void timeFormatChanged();
 
