@@ -32,7 +32,11 @@ int main(int argc, char *argv[])
         &app, []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
 
-    engine.loadFromModule("GeruBlocks", "Main");
+    // Packaging refactor (backlog Section 5): Main.qml now lives in its own
+    // module, "GeruBlocksTestHarness" -- separate from the "GeruBlocks"
+    // library module it imports components from. Was "GeruBlocks" before
+    // this split, when Main.qml and the component library shared one module.
+    engine.loadFromModule("GeruBlocksTestHarness", "Main");
 
     return app.exec();
 }
