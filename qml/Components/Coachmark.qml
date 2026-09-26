@@ -1,11 +1,34 @@
 import QtQuick
+import QtQuick.Effects
 import GeruBlocks
 
 // Coachmark — Step 9 Transient Overlays (final piece of this batch)
 //
-// SCOPED DOWN FROM THE FULL SPEC RECIPE, SAME REASONING AS DIALOG/
-// DRAWER: solid panel + dimming scrim instead of true translucent
-// blur — see this batch's top-level note.
+// GLASS MATERIAL, ADDED (backlog item — was previously scoped down to
+// solid, same stale reasoning as Dialog originally had; see Dialog.qml's
+// header for why that reasoning no longer holds).
+//
+// COORDINATE HANDLING: Coachmark uses `parent: anchorItem`, the same
+// trigger-relative positioning as Popover, NOT the shared-coordinate-
+// space structure Dialog/Drawer/CommandPalette rely on — so this uses
+// the identical `mapToItem`-based crop offset as Popover, for the same
+// reason. See Popover.qml's header COORDINATE HANDLING note for the full
+// explanation; not repeated here in full to avoid the two copies
+// drifting out of sync with each other over time.
+//
+// Unlike Dialog/Drawer/CommandPalette/Popover, Coachmark has no dimming
+// scrim at all (it's a small floating callout, not a modal) — this only
+// adds the blur+tint treatment to the callout panel itself, nothing else
+// changes.
+//
+// border.color stays unconditionally ThemeManager.accentPrimary (not
+// switched to a lower-alpha accent like the other four) — that's
+// Coachmark's existing, intentional always-accent-bordered look for
+// onboarding attention-grabbing, unrelated to whether blur is active,
+// so it's left alone here.
+//
+// backdropSource defaults to null — old fully-opaque behavior unchanged
+// for any existing usage that doesn't pass it. No breaking API change.
 //
 // DELIBERATE THEMATIC NOTE, same spirit as Stepper.qml: the pointer
 // callout is a plain triangle (Warli grammar: triangle = structure) —
@@ -29,6 +52,7 @@ import GeruBlocks
 //       body: "Press Ctrl+K anywhere to jump to any action instantly."
 //       step: 2
 //       totalSteps: 4
+//       backdropSource: chromeRoot   // NEW -- omit for the old opaque look
 //       onNext: coachmarkFlow.advance()
 //   }
 
@@ -42,6 +66,10 @@ Item {
     property int step: 0        // 0 = no counter shown
     property int totalSteps: 0
     property real panelWidth: 260
+
+    // NEW: the real app-content Item sitting behind this overlay, to be
+    // captured + blurred. null (default) = old opaque behavior, no blur.
+    property Item backdropSource: null
 
     signal next()
     signal dismissed()
@@ -66,12 +94,59 @@ Item {
     width: panelWidth
     height: contentColumn.implicitHeight + ThemeManager.spacing16 * 2
 
-    Rectangle {
+    // Live capture of whatever's behind this overlay — see Popover.qml's
+    // header for why the mapToItem-based crop offset is used here
+    // instead of Dialog/Drawer/CommandPalette's simpler -x/-y offset.
+    // No open/close visibility flag exists on this component today (see
+    // usage — callers appear to Loader this in/out externally), so
+    // `root.visible`'s default-true Item behavior is used for the live
+    // gate, matching the convention of every other glass-enabled
+    // component in this project.
+    ShaderEffectSource {
+        id: bgCapture
+        sourceItem: root.backdropSource
+        live: root.backdropSource !== null && root.visible
+        hideSource: false
+        recursive: false
+        visible: false
+        width: root.backdropSource ? root.backdropSource.width : 1
+        height: root.backdropSource ? root.backdropSource.height : 1
+    }
+
+    Item {
+        id: panelBg
         anchors.fill: parent
-        radius: 0
-        color: ThemeManager.backgroundSurface
-        border.width: 1
-        border.color: ThemeManager.accentPrimary
+
+        readonly property point captureOffset: root.backdropSource
+            ? panelBg.mapToItem(root.backdropSource, 0, 0)
+            : Qt.point(0, 0)
+
+        // Blurred backdrop, cropped to this exact on-screen position.
+        MultiEffect {
+            visible: root.backdropSource !== null
+            source: bgCapture
+            x: -panelBg.captureOffset.x
+            y: -panelBg.captureOffset.y
+            width: root.backdropSource ? root.backdropSource.width : 1
+            height: root.backdropSource ? root.backdropSource.height : 1
+            blurEnabled: true
+            blur: 0.85
+            blurMax: 64
+            autoPaddingEnabled: false
+        }
+
+        // Tint layer, painted second (on top of blur). border.color is
+        // deliberately unconditional accentPrimary regardless of
+        // backdropSource — see file header note.
+        Rectangle {
+            anchors.fill: parent
+            radius: 0
+            color: root.backdropSource
+                ? Qt.rgba(ThemeManager.accentPrimary.r, ThemeManager.accentPrimary.g, ThemeManager.accentPrimary.b, 0.28)
+                : ThemeManager.backgroundSurface
+            border.width: 1
+            border.color: ThemeManager.accentPrimary
+        }
     }
 
     // Pointer triangle, drawn via Canvas (real angular shape, not a

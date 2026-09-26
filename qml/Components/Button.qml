@@ -30,6 +30,22 @@ import GeruBlocks
 // scale transform (0.97), matching the parallel sentence structure where
 // pressed explicitly says "+ scale-down to 0.97" as a separate clause.
 //
+// FOCUS RING, ADDED (backlog Phase 2 item, previously entirely missing):
+// Section 8 requires "visible 2px accent-colored outline with 3px offset
+// on every interactive element for keyboard navigation." ThemeManager
+// already exposed focusRingColor/focusRingWidth/focusRingOffset for
+// exactly this purpose — they were just never consumed anywhere. Uses
+// QQC2 Control's built-in `visualFocus` property rather than plain
+// `activeFocus`: visualFocus is true only when the control has focus AND
+// the current input context calls for a visible indicator (keyboard /
+// gamepad navigation) — it's deliberately false after an ordinary mouse
+// click, which is exactly the "for keyboard navigation" scoping Section 8
+// asks for, not "show a ring on every focus event regardless of cause."
+// Fade-in/out uses durationMicro (100ms, same bucket as button hover/
+// press) and is gated by ThemeManager.reducedMotion, matching the
+// gating convention already used elsewhere in this project (e.g.
+// StatTile's count-up Behavior) rather than leaving it ungated.
+//
 // Usage:
 //   Button { text: "Save"; variant: "primary"; onClicked: ... }
 //   Button { text: "Cancel"; variant: "secondary" }
@@ -100,6 +116,36 @@ Basic.Button {
             color: root.variant === "primary" ? root._overlayColor : ThemeManager.accentPrimary
             opacity: root._overlayOpacity
             Behavior on opacity {
+                NumberAnimation {
+                    duration: ThemeManager.durationMicro
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: ThemeManager.easingCurve
+                }
+            }
+        }
+
+        // --- Focus ring (Section 8: 2px accent outline, 3px offset) ---
+        // Sits outside the button's own bounds via negative margins of
+        // (offset + width) on all sides, so the ring's *inner* edge is
+        // `focusRingOffset` px clear of the button border, and the ring
+        // itself is `focusRingWidth` px thick — matching standard
+        // outline-offset semantics rather than an outline drawn flush
+        // against the edge. radius: 0 to stay consistent with the
+        // system-wide sharp-corner rule (Section 3.4) even though this
+        // is decorative chrome, not a content surface.
+        Rectangle {
+            id: focusRing
+            anchors.fill: parent
+            anchors.margins: -(ThemeManager.focusRingOffset + ThemeManager.focusRingWidth)
+            radius: 0
+            color: "transparent"
+            border.width: ThemeManager.focusRingWidth
+            border.color: ThemeManager.focusRingColor
+            visible: opacity > 0
+            opacity: root.visualFocus ? 1.0 : 0.0
+
+            Behavior on opacity {
+                enabled: !ThemeManager.reducedMotion
                 NumberAnimation {
                     duration: ThemeManager.durationMicro
                     easing.type: Easing.BezierSpline

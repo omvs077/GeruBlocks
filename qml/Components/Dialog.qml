@@ -1,20 +1,43 @@
 import QtQuick
+import QtQuick.Effects
 import GeruBlocks
 
 // Dialog — Step 4 Overlays & App Shell
 //
-// SCOPED DOWN FROM THE FULL SPEC RECIPE, FLAGGED CLEARLY: Section 3.5's
-// glass material recipe calls for a translucent background + 16px
-// backdrop blur of whatever's behind the dialog. Implementing real
-// backdrop blur requires an overlay architecture that can grab a live
-// texture of the actual app content sitting behind the modal — which
-// doesn't exist yet, since AppShell (the thing that defines "what's
-// behind the dialog") is last in this build step's order. Rather than
-// hack together blur against a structure that doesn't exist, this uses
-// a plain dimming scrim (no blur) and a solid, fully-opaque panel
-// background for now. Revisit once AppShell's overlay layer exists —
-// this is an interim scope decision, not a finished implementation of
-// the spec's glass recipe.
+// GLASS MATERIAL, ADDED (backlog item — was previously scoped down to
+// solid, on the reasoning that AppShell's overlay layer didn't exist yet
+// to grab a live texture from). That reasoning is now stale: AppShell.qml
+// exists and the exact live-capture technique this file uses is already
+// proven working on Drawer.qml/CommandPalette.qml. This applies the
+// IDENTICAL technique, unmodified — see Drawer.qml's header for the full
+// rationale (ShaderEffectSource + MultiEffect, blur painted first/tint
+// painted second inside a transparent panel, offset by -panel.x/-panel.y).
+// Dialog's root shares the same `anchors.fill: parent` structure as
+// Drawer/CommandPalette, so the same coordinate-space assumption holds
+// (root and backdropSource both fill the same Window) — no adaptation
+// needed here, unlike Popover/Coachmark (see those files).
+//
+// backdropSource defaults to null — old fully-opaque behavior unchanged
+// for any existing usage that doesn't pass it. No breaking API change.
+//
+// KNOWN MINOR LIMITATION, carried over from CommandPalette (same cause):
+// this panel SCALES during its open/close transition (0.95 -> 1.0), same
+// as CommandPalette and unlike Drawer (which only translates). The blur
+// child scales along with panel, so alignment is very slightly off
+// during the ~320ms transition, settling correctly once fully open/
+// closed. Same judgment call as CommandPalette: not worth a second
+// capture pass for a sub-third-of-a-second cosmetic wobble.
+//
+// AppShell WIRING NOTE, FLAGGED SEPARATELY — NOT FIXED HERE: AppShell.qml
+// mounts `CommandPalette {}` with no backdropSource passed at all, so
+// even CommandPalette's own proven glass sits dormant (falls back to
+// opaque) in the actual app shell today, not just in Dialog/Popover/
+// Coachmark. Giving Dialog this SAME opt-in capability doesn't fix that
+// wiring gap — it just means Dialog is no longer behind Drawer/
+// CommandPalette in capability. Actually connecting a real backdropSource
+// at every call site (AppShell and per-page Dialog instances alike) is
+// its own follow-up task, out of scope for "give these components the
+// capability" vs. "wire every real usage to it."
 //
 // TYPEFACE CONVENTION, Phase 3 typography backlog lever 5 (Martel):
 // the backlog's Martel use case is "Dialog terms-and-conditions text,
@@ -39,6 +62,7 @@ import GeruBlocks
 //   Dialog {
 //       id: myDialog
 //       title: "Confirm Action"
+//       backdropSource: chromeRoot   // NEW -- omit for the old opaque look
 //       Text { text: "Are you sure?"; color: ThemeManager.textSecondary }
 //       footer: Component {
 //           Row {
@@ -62,6 +86,11 @@ Item {
     // an explicit action (e.g. destructive confirms) — not spec-stated,
     // a reasonable default that's easy to turn off per-instance.
     property bool dismissOnScrimClick: true
+
+    // NEW: the real app-content Item sitting behind this overlay, to be
+    // captured + blurred. null (default) = old opaque behavior, no blur.
+    // Same property, same meaning, same default as Drawer/CommandPalette.
+    property Item backdropSource: null
 
     signal opened()
     signal closed()
@@ -93,15 +122,33 @@ Item {
         }
     }
 
+    // Live capture of whatever's behind this overlay — identical
+    // technique to Drawer.qml/CommandPalette.qml, see Drawer.qml's
+    // header for the full rationale. Only live while a backdropSource
+    // is supplied and the dialog is actually open.
+    ShaderEffectSource {
+        id: bgCapture
+        sourceItem: root.backdropSource
+        live: root.backdropSource !== null && root.visible
+        hideSource: false
+        recursive: false
+        visible: false
+        width: root.backdropSource ? root.backdropSource.width : 1
+        height: root.backdropSource ? root.backdropSource.height : 1
+    }
+
     Rectangle {
         id: panel
         anchors.centerIn: parent
         width: root.panelWidth
         height: contentColumn.implicitHeight + ThemeManager.spacing24 * 2
         radius: 0  // sharp corners, no exceptions, even for dialogs (Section 3.4)
-        color: ThemeManager.backgroundSurface
+        color: "transparent"  // see Drawer.qml LAYERING NOTE — tint is a child Rectangle below
         border.width: 1
-        border.color: ThemeManager.borderDefault
+        border.color: root.backdropSource
+            ? Qt.rgba(ThemeManager.accentPrimary.r, ThemeManager.accentPrimary.g, ThemeManager.accentPrimary.b, 0.5)
+            : ThemeManager.borderDefault
+        clip: true
 
         scale: root.visible ? 1.0 : 0.95
         opacity: root.visible ? 1.0 : 0.0
@@ -119,6 +166,33 @@ Item {
                 easing.type: Easing.BezierSpline
                 easing.bezierCurve: ThemeManager.easingCurve
             }
+        }
+
+        // Blurred backdrop, clipped to panel's bounds, offset to align
+        // with the live capture behind it. Painted first (bottom-most) —
+        // identical positioning technique to Drawer/CommandPalette,
+        // valid here because Dialog's root also anchors.fill the same
+        // parent as backdropSource (see file header note).
+        MultiEffect {
+            visible: root.backdropSource !== null
+            source: bgCapture
+            x: -panel.x
+            y: -panel.y
+            width: root.width
+            height: root.height
+            blurEnabled: true
+            blur: 0.85
+            blurMax: 64
+            autoPaddingEnabled: false
+        }
+
+        // Tint layer, painted second (on top of blur). Falls back to the
+        // original opaque surface color when no backdropSource supplied.
+        Rectangle {
+            anchors.fill: parent
+            color: root.backdropSource
+                ? Qt.rgba(ThemeManager.accentPrimary.r, ThemeManager.accentPrimary.g, ThemeManager.accentPrimary.b, 0.28)
+                : ThemeManager.backgroundSurface
         }
 
         // Swallow clicks so they don't fall through to the scrim's

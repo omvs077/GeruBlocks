@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import GeruBlocks
 
 // StatTile — Step 11 Data Display ("Stat/KPI tile" in the spec's
@@ -40,6 +41,39 @@ import GeruBlocks
 // this is a reasonable engineering response to a real constraint, not
 // something explicitly reviewed/signed off.
 //
+// ELEVATION, ADDED (backlog item — StatTile previously had NO shadow at
+// all, unlike Card, which at least had a flagged simplified one). Two
+// structural things changed to make a real shadow possible:
+//
+//   1. root is now a plain Item instead of a Rectangle. A shadow can't
+//      be sourced from the same Item it's attached behind — MultiEffect
+//      needs a separate sibling Item to read as its `source`, so the
+//      visible fill/border/radius that used to live directly on root
+//      were moved into a new named child, `tileBg`. Nothing in this
+//      file's own public API changes (label/value/trend/trendText/
+//      variant/backContent are all custom properties, unaffected) — but
+//      FLAG FOR YOU: if anything OUTSIDE this file reads or sets
+//      StatTile.color / StatTile.border / StatTile.radius directly
+//      (relying on the old Rectangle base type), that call site will
+//      break. Worth a project-wide grep for `StatTile {` instances using
+//      those properties before treating this as a safe drop-in.
+//   2. StatTile previously had no general-purpose hover tracking at all
+//      — the only existing HoverHandler is scoped to backContent !== null
+//      (it drives the flip). A second, always-enabled HoverHandler was
+//      added purely to drive the elevation raise (resting → elevation.2
+//      on hover), matching the same hover-raises-elevation precedent
+//      already established on Card. FLAGGED AS MY OWN EXTENSION, NOT
+//      SPEC-STATED: the spec's elevation.2 token description says
+//      "Hover state, dropdowns" without naming StatTile specifically —
+//      this reads that as intent-consistent with Card's own precedent
+//      rather than a literal instruction, so confirm this is wanted
+//      before treating it as locked.
+//
+// Same blur-normalization caveat as Card.qml applies here — see that
+// file's header comment for the full reasoning (elevation*Blur pixel
+// tokens divided by 24 and clamped to MultiEffect's 0.0-1.0 shadowBlur
+// range; not a verified-correct spec transcription).
+//
 // Usage:
 //   StatTile { label: "Active Projects"; value: "24" }
 //   StatTile { label: "Monthly Revenue"; value: "\u20b945,00,000"; trend: "up"; trendText: "+12% vs last month" }
@@ -51,7 +85,7 @@ import GeruBlocks
 //       }
 //   }
 
-Rectangle {
+Item {
     id: root
     property string label: ""
     property string value: ""
@@ -75,12 +109,20 @@ Rectangle {
 
     property bool _showingBack: false
 
+    // General-purpose hover flag driving elevation only — deliberately
+    // separate from the flip-triggering HoverHandler below, since flip
+    // is opt-in (backContent !== null) but elevation-on-hover applies to
+    // every tile.
+    property bool _elevationHovered: false
+
+    // Normalizes a pixel blur-radius token to MultiEffect's 0.0-1.0
+    // shadowBlur range. See Card.qml's header comment for full reasoning.
+    function _blurNormalized(pixelBlur) {
+        return Math.min(pixelBlur / 24, 1.0)
+    }
+
     implicitWidth: 220
     implicitHeight: contentColumn.implicitHeight + ThemeManager.spacing16 * 2
-    radius: 0
-    color: isFeatured ? ThemeManager.accentPrimary : ThemeManager.backgroundSurface
-    border.width: isFeatured ? 0 : 1
-    border.color: ThemeManager.borderDefault
 
     transform: Scale {
         id: flipScale
@@ -118,6 +160,68 @@ Rectangle {
                 flipAnim.start()
             }
         }
+    }
+
+    // Elevation-only hover tracking (see file-header ELEVATION note).
+    // Always enabled, unlike the flip HoverHandler above.
+    HoverHandler {
+        id: elevationHoverHandler
+        onHoveredChanged: root._elevationHovered = hovered
+    }
+
+    // Real blurred drop-shadow, sourced from tileBg. Declared and
+    // positioned before tileBg in document order (no explicit z needed,
+    // though one is set for robustness against future reordering) so it
+    // paints behind the visible surface.
+    MultiEffect {
+        id: tileShadow
+        anchors.fill: tileBg
+        source: tileBg
+        z: -10
+        autoPaddingEnabled: true
+
+        shadowEnabled: true
+        shadowColor: "#000000"
+        shadowHorizontalOffset: 0
+
+        shadowOpacity: root._elevationHovered ? ThemeManager.elevation2Alpha : ThemeManager.elevation1Alpha
+        shadowVerticalOffset: root._elevationHovered ? ThemeManager.elevation2YOffset : ThemeManager.elevation1YOffset
+        shadowBlur: root._elevationHovered ? root._blurNormalized(ThemeManager.elevation2Blur)
+                                            : root._blurNormalized(ThemeManager.elevation1Blur)
+
+        Behavior on shadowOpacity {
+            NumberAnimation {
+                duration: ThemeManager.durationBase
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: ThemeManager.easingCurve
+            }
+        }
+        Behavior on shadowVerticalOffset {
+            NumberAnimation {
+                duration: ThemeManager.durationBase
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: ThemeManager.easingCurve
+            }
+        }
+        Behavior on shadowBlur {
+            NumberAnimation {
+                duration: ThemeManager.durationBase
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: ThemeManager.easingCurve
+            }
+        }
+    }
+
+    // Visible surface — was previously root's own Rectangle base; moved
+    // here so the shadow above has a separate Item to source from. See
+    // file-header ELEVATION note, point 1, for the public-API flag.
+    Rectangle {
+        id: tileBg
+        anchors.fill: parent
+        radius: 0
+        color: root.isFeatured ? ThemeManager.accentPrimary : ThemeManager.backgroundSurface
+        border.width: root.isFeatured ? 0 : 1
+        border.color: ThemeManager.borderDefault
     }
 
     // ---------- Front face ----------

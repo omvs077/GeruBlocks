@@ -103,6 +103,7 @@ Window {
     Dialog {
         id: testDialog
         title: "Confirm Action"
+        backdropSource: chromeRoot
         Text {
             text: "Are you sure you want to proceed?"
             color: ThemeManager.textSecondary
@@ -133,6 +134,7 @@ Window {
         id: termsDialog
         title: "Terms & Conditions"
         panelWidth: 480
+        backdropSource: chromeRoot
         Column {
             width: parent.width
             spacing: 8
@@ -196,7 +198,13 @@ Window {
 
     Component {
         id: appShellComponent
-        AppShell {}
+        // standalone: false -- Main.qml already provides the global
+        // overlay layer (CommandPalette/ToastHost/Drawer, all below)
+        // for the whole window; AppShell shouldn't mount a second,
+        // competing set while it's loaded as a nested test-harness page
+        // rather than the real app entry point. See AppShell.qml's
+        // `standalone` property note for the full reasoning.
+        AppShell { standalone: false }
     }
 
     Component {

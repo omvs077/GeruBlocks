@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls.Basic as Basic
+import QtQuick.Effects
 import GeruBlocks
 
 // Card — Step 2 Typography & Core Primitives
@@ -34,6 +35,28 @@ import GeruBlocks
 // Component slot (for action buttons/links at the bottom). If you meant
 // something more rigid, tell me and I'll rebuild the API.
 //
+// ELEVATION, REBUILT (backlog item — was previously a flagged
+// placeholder): the earlier version used a plain offset semi-transparent
+// rectangle instead of a true blurred shadow, specifically because
+// MultiEffect's shadow behavior hadn't been verified yet at the time.
+// MultiEffect is now proven working elsewhere in this project (it's what
+// powers the glass blur on Drawer.qml/CommandPalette.qml), so this now
+// uses a real MultiEffect drop-shadow sourced from the card's own
+// background, giving elevation.1 (resting) / elevation.2 (hover/raised)
+// a genuine soft blur instead of a hard-edged offset rectangle.
+//
+// BLUR-VALUE MAPPING, FLAGGED — NOT SPEC-LOCKED: ThemeManager's
+// elevation*Blur tokens are pixel values (2 / 12 / 24), transcribed
+// directly from the spec's CSS-style box-shadow blur radii. MultiEffect's
+// `shadowBlur` property is a *normalized* 0.0–1.0 amount, not a pixel
+// radius — Qt doesn't document a fixed px-to-normalized conversion. This
+// implementation divides by 24 (elevation.3's own blur value) and clamps
+// to 1.0, so elevation.3 maps to the effect's maximum blur and the other
+// two scale proportionally beneath it. This is a reasonable interpretation
+// of the token values, not a verified-correct spec transcription — worth
+// a visual side-by-side against the original box-shadow intent before
+// treating this mapping as locked.
+//
 // Usage:
 //   Card {
 //       title: "Zone 3 — AHU Status"
@@ -66,35 +89,19 @@ Basic.Button {
     property real _glowX: 0
     property real _glowY: 0
 
+    // Normalizes a pixel blur-radius token to MultiEffect's 0.0-1.0
+    // shadowBlur range. See the file-level ELEVATION comment above for
+    // why 24 (elevation.3's own blur value) is the chosen reference.
+    function _blurNormalized(pixelBlur) {
+        return Math.min(pixelBlur / 24, 1.0)
+    }
+
     background: Rectangle {
         id: cardBg
         radius: 0  // sharp corners, no exceptions
         color: ThemeManager.backgroundSurface
         border.width: 1
         border.color: ThemeManager.borderDefault
-
-        // Elevation: resting vs. raised (spec's elevation.1 / elevation.2
-        // tokens, Section 3.1). SIMPLIFIED, FLAGGED — this is a plain
-        // offset semi-transparent rectangle using the token's alpha/
-        // y-offset values directly, not a true soft-blur shadow. I didn't
-        // want to guess at MultiEffect's shadow-property exact semantics
-        // (blur normalization, etc.) without verifying them the way I did
-        // for masking earlier — a real blurred shadow is a reasonable
-        // follow-up once that's actually checked, not implemented here.
-        Rectangle {
-            anchors.fill: parent
-            anchors.topMargin: root.hovered ? ThemeManager.elevation2YOffset : ThemeManager.elevation1YOffset
-            z: -1
-            color: "#000000"
-            opacity: root.hovered ? ThemeManager.elevation2Alpha : ThemeManager.elevation1Alpha
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: ThemeManager.durationBase
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: ThemeManager.easingCurve
-                }
-            }
-        }
 
         MouseArea {
             id: glowTracker
@@ -160,6 +167,54 @@ Basic.Button {
         }
     }
 
+    // Real blurred drop-shadow, sourced from the card's own background.
+    // Declared as a sibling of `background` (not nested inside it) and
+    // placed first in document order / given a low explicit z so it
+    // paints BEHIND the background rectangle — a shadow can't live
+    // inside the thing it's shadowing. `source: background` reads
+    // background's live rendered output directly (the same MultiEffect
+    // source-from-Item technique already proven for icon masking and
+    // glass blur elsewhere in this project), no manual ShaderEffectSource
+    // wiring needed.
+    MultiEffect {
+        id: cardShadow
+        anchors.fill: background
+        source: background
+        z: -10
+        autoPaddingEnabled: true
+
+        shadowEnabled: true
+        shadowColor: "#000000"
+        shadowHorizontalOffset: 0
+
+        shadowOpacity: root.hovered ? ThemeManager.elevation2Alpha : ThemeManager.elevation1Alpha
+        shadowVerticalOffset: root.hovered ? ThemeManager.elevation2YOffset : ThemeManager.elevation1YOffset
+        shadowBlur: root.hovered ? root._blurNormalized(ThemeManager.elevation2Blur)
+                                  : root._blurNormalized(ThemeManager.elevation1Blur)
+
+        Behavior on shadowOpacity {
+            NumberAnimation {
+                duration: ThemeManager.durationBase
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: ThemeManager.easingCurve
+            }
+        }
+        Behavior on shadowVerticalOffset {
+            NumberAnimation {
+                duration: ThemeManager.durationBase
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: ThemeManager.easingCurve
+            }
+        }
+        Behavior on shadowBlur {
+            NumberAnimation {
+                duration: ThemeManager.durationBase
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: ThemeManager.easingCurve
+            }
+        }
+    }
+
     contentItem: Column {
         id: contentColumn
         spacing: ThemeManager.spacing12
@@ -182,4 +237,3 @@ Basic.Button {
         }
     }
 }
-
