@@ -96,14 +96,34 @@ Basic.Popup {
 
     background: Item {
         id: bg
+        // REQUIRED, WAS MISSING: see ToastHost.qml's fuller note — this
+        // was found to be the likely root cause of "no blur at all" in
+        // that file (confirmed by direct comparison against Dialog.qml's
+        // working `panel`, which has clip: true). Applied here
+        // preemptively since this file shares the identical omission.
+        clip: true
 
         // Popover's own on-screen position, expressed in backdropSource's
         // coordinate space — NOT a simple -x/-y offset like Dialog/Drawer/
         // CommandPalette, since Popover doesn't share their coordinate
         // space (see file header COORDINATE HANDLING note).
-        readonly property point captureOffset: root.backdropSource
-            ? bg.mapToItem(root.backdropSource, 0, 0)
-            : Qt.point(0, 0)
+        //
+        // FIX, ADDED PREEMPTIVELY: ToastHost's identical mapToItem-in-
+        // binding pattern was found, on-device, to render with NO blur
+        // at all (not just misaligned) — almost certainly because
+        // mapToItem() doesn't reliably register as a tracked QML
+        // binding dependency on its own (a documented gotcha). The
+        // `_trigger` line forces explicit dependencies on the
+        // properties that actually determine this offset, so the
+        // binding re-evaluates correctly. Applied here preemptively,
+        // since this file was never screenshot-confirmed and shares the
+        // exact same risk — see ToastHost.qml's fuller note on this.
+        readonly property point captureOffset: {
+            var _trigger = [bg.x, bg.y, bg.width, bg.height, root.x, root.y]
+            return root.backdropSource
+                ? bg.mapToItem(root.backdropSource, 0, 0)
+                : Qt.point(0, 0)
+        }
 
         // Blurred backdrop, cropped to this exact on-screen position.
         // Painted first (bottom-most), same layering as Drawer/

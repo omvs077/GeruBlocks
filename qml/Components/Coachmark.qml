@@ -116,10 +116,27 @@ Item {
     Item {
         id: panelBg
         anchors.fill: parent
+        // REQUIRED, WAS MISSING: see ToastHost.qml's fuller note — this
+        // was found to be the likely root cause of "no blur at all" in
+        // that file (confirmed by direct comparison against Dialog.qml's
+        // working `panel`, which has clip: true). Applied here
+        // preemptively since this file shares the identical omission.
+        clip: true
 
-        readonly property point captureOffset: root.backdropSource
-            ? panelBg.mapToItem(root.backdropSource, 0, 0)
-            : Qt.point(0, 0)
+        // FIX, ADDED PREEMPTIVELY — see ToastHost.qml's fuller note:
+        // ToastHost's identical mapToItem-in-binding pattern was found,
+        // on-device, to render with NO blur at all, almost certainly
+        // because mapToItem() doesn't reliably register as a tracked
+        // QML binding dependency on its own. The `_trigger` line forces
+        // explicit dependencies on the properties that actually
+        // determine this offset. Applied here preemptively since this
+        // file was never screenshot-confirmed and shares the same risk.
+        readonly property point captureOffset: {
+            var _trigger = [panelBg.x, panelBg.y, panelBg.width, panelBg.height, root.x, root.y]
+            return root.backdropSource
+                ? panelBg.mapToItem(root.backdropSource, 0, 0)
+                : Qt.point(0, 0)
+        }
 
         // Blurred backdrop, cropped to this exact on-screen position.
         MultiEffect {

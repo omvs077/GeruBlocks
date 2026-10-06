@@ -128,7 +128,7 @@ Window {
         }
     }
 
-    ToastHost {}
+    ToastHost { backdropSource: chromeRoot }
 
     Dialog {
         id: termsDialog
@@ -1175,4 +1175,5 @@ Window {
         }
     }
 }
+
 
