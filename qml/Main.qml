@@ -180,6 +180,9 @@ Window {
         CommandRegistry.register("toast-error", "Show Error Toast", "Actions", "close", "", function() {
             ToastManager.show("This is an error toast", "error")
         })
+        CommandRegistry.register("toast-neutral", "Show Neutral Toast", "Actions", "info", "", function() {
+            ToastManager.show("This is a neutral toast", "neutral")
+        })
     }
 
     Component {
@@ -848,6 +851,7 @@ Window {
                             Popover {
                                 id: quickPopover
                                 anchorItem: popoverBtn
+                                backdropSource: chromeRoot
                                 AppText { text: "Quick settings"; variant: "subtitle" }
                                 AppSwitch { text: "Dark mode" }
                             }
@@ -869,6 +873,7 @@ Window {
                         id: testCoachmark
                         anchorItem: coachmarkBtn
                         side: "bottom"
+                        backdropSource: chromeRoot
                         visible: false
                         title: "New: Quick Actions"
                         body: "Click here anytime to jump to your recent items."
@@ -1175,5 +1180,4 @@ Window {
         }
     }
 }
-
 
